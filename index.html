@@ -397,23 +397,75 @@
     </div>
 
     <script>
-        // Dados de exemplo (simulando um banco de dados)
-        let agendamentos = [
-            {
-                id: 1,
-                sala: "Sala 1",
-                professor: "Prof. João Silva",
-                inicio: "2024-10-29T09:00",
-                fim: "2024-10-29T11:00"
-            },
-            {
-                id: 2,
-                sala: "Laboratório 1",
-                professor: "Prof. Maria Santos",
-                inicio: "2024-10-30T14:00",
-                fim: "2024-10-30T16:00"
+        // 🔥 SISTEMA DE ARMAZENAMENTO SIMPLES - SEM CONFIGURAÇÃO COMPLEXA
+        class SistemaAgendamento {
+            constructor() {
+                this.chaveStorage = 'agendamentos_senai';
+                this.agendamentos = this.carregarDoStorage();
             }
-        ];
+
+            // Salvar no localStorage (funciona offline e online)
+            salvarNoStorage() {
+                try {
+                    localStorage.setItem(this.chaveStorage, JSON.stringify(this.agendamentos));
+                    return true;
+                } catch (e) {
+                    console.error('Erro ao salvar no storage:', e);
+                    return false;
+                }
+            }
+
+            // Carregar do localStorage
+            carregarDoStorage() {
+                try {
+                    const dados = localStorage.getItem(this.chaveStorage);
+                    return dados ? JSON.parse(dados) : [];
+                } catch (e) {
+                    console.error('Erro ao carregar do storage:', e);
+                    return [];
+                }
+            }
+
+            // Gerar ID único
+            gerarId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            // Adicionar novo agendamento
+            adicionarAgendamento(dados) {
+                const novoAgendamento = {
+                    id: this.gerarId(),
+                    sala: dados.sala,
+                    professor: dados.professor,
+                    inicio: dados.inicio,
+                    fim: dados.fim,
+                    dataCriacao: new Date().toISOString()
+                };
+
+                this.agendamentos.push(novoAgendamento);
+                const sucesso = this.salvarNoStorage();
+                
+                return {
+                    sucesso: sucesso,
+                    agendamento: novoAgendamento,
+                    mensagem: sucesso ? 'Agendamento salvo com sucesso!' : 'Erro ao salvar agendamento'
+                };
+            }
+
+            // Obter todos os agendamentos
+            obterAgendamentos() {
+                return this.agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
+            }
+
+            // Limpar todos os agendamentos (apenas para emergências)
+            limparTodos() {
+                this.agendamentos = [];
+                this.salvarNoStorage();
+            }
+        }
+
+        // Instanciar o sistema
+        const sistema = new SistemaAgendamento();
 
         // Inicialização da página
         document.addEventListener('DOMContentLoaded', function() {
@@ -422,17 +474,15 @@
             carregarAgendamentos();
         });
 
-        // Configurar datas iniciais (agora + 1 hora para início, +2 horas para fim)
+        // Configurar datas iniciais
         function configurarDatasIniciais() {
             const agora = new Date();
-            const inicio = new Date(agora.getTime() + 60 * 60 * 1000); // +1 hora
-            const fim = new Date(inicio.getTime() + 60 * 60 * 1000); // +1 hora adicional
+            const inicio = new Date(agora.getTime() + 60 * 60 * 1000);
+            const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
             
-            // Formatar para datetime-local
             document.getElementById('dataInicio').value = formatarParaDateTimeLocal(inicio);
             document.getElementById('dataFim').value = formatarParaDateTimeLocal(fim);
             
-            // Adicionar validações em tempo real
             document.getElementById('dataInicio').addEventListener('change', validarDatas);
             document.getElementById('dataFim').addEventListener('change', validarDatas);
         }
@@ -448,7 +498,7 @@
             return `${ano}-${mes}-${dia}T${horas}:${minutos}`;
         }
 
-        // Validar se a data de fim é posterior à data de início
+        // Validar datas
         function validarDatas() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
@@ -493,31 +543,32 @@
                 return;
             }
 
-            // Criar novo agendamento
-            const novoAgendamento = {
-                id: agendamentos.length + 1,
+            // Criar agendamento no sistema
+            const resultado = sistema.adicionarAgendamento({
                 sala: sala,
                 professor: professor,
                 inicio: dataInicio,
                 fim: dataFim
-            };
-
-            // Adicionar à lista (simulando salvamento)
-            agendamentos.push(novoAgendamento);
+            });
 
             // Feedback visual
-            statusDiv.innerHTML = '✅ Agendamento criado com sucesso!';
-            statusDiv.className = 'status status-success';
-
-            // Limpar formulário
-            limparFormulario();
-
-            // Recarregar lista
-            setTimeout(() => {
-                carregarAgendamentos();
-                statusDiv.innerHTML = '📋 Preencha o formulário para criar um novo agendamento';
-                statusDiv.className = 'status status-info';
-            }, 3000);
+            if (resultado.sucesso) {
+                statusDiv.innerHTML = '✅ ' + resultado.mensagem;
+                statusDiv.className = 'status status-success';
+                
+                // Limpar formulário
+                limparFormulario();
+                
+                // Recarregar lista após 2 segundos
+                setTimeout(() => {
+                    carregarAgendamentos();
+                    statusDiv.innerHTML = '📋 Preencha o formulário para criar um novo agendamento';
+                    statusDiv.className = 'status status-info';
+                }, 2000);
+            } else {
+                statusDiv.innerHTML = '❌ ' + resultado.mensagem;
+                statusDiv.className = 'status status-error';
+            }
         }
 
         // Limpar formulário
@@ -532,6 +583,7 @@
         function carregarAgendamentos() {
             const container = document.getElementById('agendamentos-container');
             const contador = document.getElementById('contador');
+            const agendamentos = sistema.obterAgendamentos();
 
             if (!agendamentos || agendamentos.length === 0) {
                 container.innerHTML = `
@@ -544,9 +596,6 @@
                 contador.textContent = '0 agendamentos';
                 return;
             }
-
-            // Ordenar por data mais recente primeiro
-            agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
 
             let html = '<div class="agendamentos-grid">';
             
@@ -591,6 +640,10 @@
                                 <strong>📅 Duração:</strong>
                                 <span>${calcularDuracao(ag.inicio, ag.fim)}</span>
                             </div>
+                            <div class="info-item">
+                                <strong>🆔 ID:</strong>
+                                <span style="font-family: monospace; font-size: 12px;">${ag.id}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -627,6 +680,28 @@
                 return `${horas}h ${minutos}min`;
             }
         }
+
+        // Exportar dados (para backup)
+        function exportarDados() {
+            const dados = sistema.obterAgendamentos();
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `agendamentos_senai_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Adicionar botão de exportação (opcional)
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttonGroup = document.querySelector('.button-group');
+            const exportButton = document.createElement('button');
+            exportButton.className = 'btn';
+            exportButton.innerHTML = '📤 Exportar Dados';
+            exportButton.onclick = exportarDados;
+            buttonGroup.appendChild(exportButton);
+        });
     </script>
 </body>
 </html>
