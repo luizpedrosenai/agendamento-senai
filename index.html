@@ -437,6 +437,15 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="periodo">Período:</label>
+                        <select id="periodo">
+                            <option value="">Selecione o período</option>
+                            <option value="Manhã">Manhã</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noite">Noite</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="inicio">Data e Hora de Início:</label>
                         <input type="datetime-local" id="inicio">
                     </div>
@@ -482,6 +491,15 @@
                                 <option value="Sábado">Sábado</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="filtroPeriodo">Filtrar por Período:</label>
+                            <select id="filtroPeriodo">
+                                <option value="">Todos os períodos</option>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
+                            </select>
+                        </div>
                         <div class="filtro-actions">
                             <button class="btn btn-filter" onclick="aplicarFiltros()">
                                 🔍 Aplicar Filtros
@@ -518,7 +536,6 @@
 
         // Variáveis globais para filtros
         let agendamentosGlobal = [];
-        let filtroAtivo = false;
 
         // Carregar agendamentos quando a página carregar
         document.addEventListener('DOMContentLoaded', function () {
@@ -572,6 +589,7 @@
         function aplicarFiltros() {
             const filtroSala = document.getElementById('filtroSala').value;
             const filtroDia = document.getElementById('filtroDia').value;
+            const filtroPeriodo = document.getElementById('filtroPeriodo').value;
 
             let agendamentosFiltrados = [...agendamentosGlobal];
 
@@ -585,8 +603,13 @@
                 agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.diaSemana === filtroDia);
             }
 
+            // Aplicar filtro por período
+            if (filtroPeriodo) {
+                agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.periodo === filtroPeriodo);
+            }
+
             // Atualizar informações do filtro
-            atualizarInfoFiltro(filtroSala, filtroDia);
+            atualizarInfoFiltro(filtroSala, filtroDia, filtroPeriodo);
             
             // Mostrar agendamentos filtrados
             mostrarAgendamentos(agendamentosFiltrados);
@@ -595,20 +618,22 @@
         function limparFiltros() {
             document.getElementById('filtroSala').value = '';
             document.getElementById('filtroDia').value = '';
+            document.getElementById('filtroPeriodo').value = '';
             document.getElementById('filter-info').innerHTML = '';
             mostrarAgendamentos(agendamentosGlobal);
         }
 
-        function atualizarInfoFiltro(filtroSala, filtroDia) {
+        function atualizarInfoFiltro(filtroSala, filtroDia, filtroPeriodo) {
             const filterInfo = document.getElementById('filter-info');
             let infoText = '';
 
-            if (filtroSala && filtroDia) {
-                infoText = `Mostrando agendamentos da <strong>${filtroSala}</strong> no dia <strong>${filtroDia}</strong>`;
-            } else if (filtroSala) {
-                infoText = `Mostrando agendamentos da <strong>${filtroSala}</strong>`;
-            } else if (filtroDia) {
-                infoText = `Mostrando agendamentos do dia <strong>${filtroDia}</strong>`;
+            const filtros = [];
+            if (filtroSala) filtros.push(`sala <strong>${filtroSala}</strong>`);
+            if (filtroDia) filtros.push(`dia <strong>${filtroDia}</strong>`);
+            if (filtroPeriodo) filtros.push(`período <strong>${filtroPeriodo}</strong>`);
+
+            if (filtros.length > 0) {
+                infoText = `Mostrando agendamentos do ${filtros.join(', ')}`;
             } else {
                 filterInfo.innerHTML = '';
                 return;
@@ -631,9 +656,10 @@
             if (agendamentos.length === 0) {
                 const filtroSala = document.getElementById('filtroSala').value;
                 const filtroDia = document.getElementById('filtroDia').value;
+                const filtroPeriodo = document.getElementById('filtroPeriodo').value;
                 
                 let mensagem = 'Nenhum agendamento encontrado';
-                if (filtroSala || filtroDia) {
+                if (filtroSala || filtroDia || filtroPeriodo) {
                     mensagem += ' com os filtros aplicados';
                 }
 
@@ -641,8 +667,8 @@
                     <div class="empty-state">
                         <div style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;">📭</div>
                         <h3>${mensagem}</h3>
-                        <p>${filtroSala || filtroDia ? 'Tente alterar os filtros ou ' : ''}Adicione um novo agendamento usando o formulário acima.</p>
-                        ${filtroSala || filtroDia ? 
+                        <p>${filtroSala || filtroDia || filtroPeriodo ? 'Tente alterar os filtros ou ' : ''}Adicione um novo agendamento usando o formulário acima.</p>
+                        ${filtroSala || filtroDia || filtroPeriodo ? 
                             `<button class="btn" onclick="limparFiltros()" style="margin-top: 15px;">
                                 🗑️ Limpar Filtros
                             </button>` : ''
@@ -707,6 +733,7 @@
                                 <div class="agendamento-info">
                                     <p><strong>Professor:</strong> ${ag.professor}</p>
                                     <p><strong>Dia:</strong> ${ag.diaSemana}</p>
+                                    <p><strong>Período:</strong> ${ag.periodo}</p>
                                     <p><strong>Início:</strong> ${inicio}</p>
                                     <p><strong>Término:</strong> ${fim}</p>
                                     <p>
@@ -738,11 +765,12 @@
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
             const diaSemana = document.getElementById('diaSemana').value;
+            const periodo = document.getElementById('periodo').value;
             const inicio = document.getElementById('inicio').value;
             const fim = document.getElementById('fim').value;
 
             // Validações
-            if (!sala || !professor || !diaSemana || !inicio || !fim) {
+            if (!sala || !professor || !diaSemana || !periodo || !inicio || !fim) {
                 alert('❌ Por favor, preencha todos os campos!');
                 return;
             }
@@ -767,20 +795,20 @@
                 const data = await response.json();
                 const agendamentos = data.record.agendamentos || [];
 
-                // Verificar conflitos - AGORA CONSIDERANDO O DIA DA SEMANA
+                // Verificar conflitos - AGORA CONSIDERANDO DIA DA SEMANA E PERÍODO
                 const conflito = agendamentos.some(ag => {
-                    // Só há conflito se for na MESMA SALA e NO MESMO DIA DA SEMANA
-                    if (ag.sala === sala && ag.diaSemana === diaSemana) {
+                    // Só há conflito se for na MESMA SALA, MESMO DIA e MESMO PERÍODO
+                    if (ag.sala === sala && ag.diaSemana === diaSemana && ag.periodo === periodo) {
                         // E se houver sobreposição de horários
                         return ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
                                (new Date(fim) > new Date(ag.inicio) && new Date(fim) <= new Date(ag.fim)) ||
                                (new Date(inicio) <= new Date(ag.inicio) && new Date(fim) >= new Date(ag.fim)));
                     }
-                    return false; // Não há conflito se for em dias diferentes
+                    return false; // Não há conflito se for em dias ou períodos diferentes
                 });
 
                 if (conflito) {
-                    alert('❌ Já existe um agendamento para esta sala no mesmo dia e horário selecionado!');
+                    alert('❌ Já existe um agendamento para esta sala no mesmo dia e período selecionado!');
                     return;
                 }
 
@@ -790,6 +818,7 @@
                     sala: sala,
                     professor: professor,
                     diaSemana: diaSemana,
+                    periodo: periodo,
                     inicio: inicio,
                     fim: fim
                 };
@@ -809,6 +838,7 @@
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
                 document.getElementById('diaSemana').value = '';
+                document.getElementById('periodo').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
 
@@ -826,6 +856,7 @@
                     sala: sala,
                     professor: professor,
                     diaSemana: diaSemana,
+                    periodo: periodo,
                     inicio: inicio,
                     fim: fim
                 });
@@ -835,6 +866,7 @@
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
                 document.getElementById('diaSemana').value = '';
+                document.getElementById('periodo').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
                 carregarAgendamentos();
