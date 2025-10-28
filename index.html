@@ -371,19 +371,28 @@
             }
 
             // Validar datas
-            if (!validarDatas()) {
+            const inicio = new Date(dataHoraInicio);
+            const fim = new Date(dataHoraFim);
+            
+            if (fim <= inicio) {
+                document.getElementById('erroGeral').textContent = '❌ A data e hora de término devem ser posteriores à data e hora de início!';
+                document.getElementById('erroGeral').style.display = 'block';
                 return;
             }
 
-            // ✅ Converter para formato "DD/MM/YYYY HH:mm" que o backend espera
+            // ✅ CORREÇÃO: Converter para formato "DD/MM/YYYY HH:mm" CORRETAMENTE
             const dataInicioFormatada = formatarDataParaBackend(dataHoraInicio);
             const dataFimFormatada = formatarDataParaBackend(dataHoraFim);
+
+            console.log('📤 Datas formatadas para envio:');
+            console.log('Início:', dataInicioFormatada);
+            console.log('Fim:', dataFimFormatada);
 
             const novoAgendamento = {
                 sala: sala,
                 professor: nome,
-                inicio: dataInicioFormatada, // Formato: "28/10/2025 14:30"
-                fim: dataFimFormatada       // Formato: "28/10/2025 16:30"
+                inicio: dataInicioFormatada,
+                fim: dataFimFormatada
             };
 
             const statusDiv = document.getElementById('api-status');
@@ -412,6 +421,7 @@
                     
                     // Limpar formulário
                     document.getElementById('nome').value = '';
+                    document.getElementById('sala').value = '';
                     
                     // Recarregar lista após 2 segundos
                     setTimeout(() => {
@@ -433,18 +443,28 @@
             }
         }
 
-        // ✅ FUNÇÃO: Converter data para formato "DD/MM/YYYY HH:mm"
+        // ✅ FUNÇÃO CORRIGIDA: Converter data para formato "DD/MM/YYYY HH:mm"
         function formatarDataParaBackend(dataHoraString) {
             try {
                 // dataHoraString vem como "YYYY-MM-DDTHH:mm"
+                console.log('📝 Formatando data:', dataHoraString);
+                
                 const [dataParte, tempoParte] = dataHoraString.split('T');
                 const [ano, mes, dia] = dataParte.split('-');
-                const [horas, minutos] = tempoParte.split(':');
+                let [horas, minutos] = tempoParte.split(':');
+                
+                // Garantir que horas e minutos tenham 2 dígitos
+                horas = horas.padStart(2, '0');
+                minutos = minutos.padStart(2, '0');
                 
                 // Formato: "DD/MM/YYYY HH:mm"
-                return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+                const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+                console.log('✅ Data formatada:', dataFormatada);
+                
+                return dataFormatada;
             } catch (error) {
-                console.error('Erro ao formatar data:', error);
+                console.error('❌ Erro ao formatar data:', error);
+                console.log('📌 Data original:', dataHoraString);
                 return dataHoraString; // Fallback
             }
         }
