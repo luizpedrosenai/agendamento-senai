@@ -26,29 +26,24 @@
             margin-bottom: 30px; border-left: 5px solid #3498db; 
         }
         .form-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 15px; margin-bottom: 20px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; margin-bottom: 20px; 
         }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-weight: 600; margin-bottom: 5px; color: #2c3e50; }
+        .form-group label { font-weight: 600; margin-bottom: 8px; color: #2c3e50; }
         .form-group input, .form-group select { 
-            padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; 
+            padding: 14px; border: 2px solid #e1e8ed; border-radius: 8px; 
             font-size: 16px; transition: border-color 0.3s ease; 
         }
         .form-group input:focus, .form-group select:focus { 
             outline: none; border-color: #3498db; 
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); 
         }
-        .datetime-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
         .btn { 
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
-            color: white; border: none; padding: 15px 30px; border-radius: 8px; 
+            color: white; border: none; padding: 16px 35px; border-radius: 8px; 
             font-size: 16px; font-weight: 600; cursor: pointer; 
-            transition: all 0.3s ease; 
+            transition: all 0.3s ease; margin-right: 10px; 
         }
         .btn:hover { 
             transform: translateY(-2px); 
@@ -97,17 +92,19 @@
             border-radius: 5px; margin: 10px 0; text-align: center;
             border: 1px solid #c3e6cb; font-weight: 600;
         }
-        .section-title {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e1e8ed;
-            color: #2c3e50;
-        }
         .error-message {
             color: #e74c3c;
             font-size: 14px;
             margin-top: 5px;
             display: none;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
     </style>
 </head>
@@ -141,58 +138,42 @@
                             <option value="Auditório">Auditório</option>
                         </select>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="professor">Professor:</label>
-                        <input type="text" id="professor" placeholder="Nome do professor" required>
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" placeholder="Seu nome completo" required>
                     </div>
                     
                     <div class="form-group">
-                        <h3 class="section-title">Data e Hora de Início</h3>
-                        <div class="datetime-group">
-                            <div class="form-group">
-                                <label for="dataInicio">Data Início:</label>
-                                <input type="date" id="dataInicio" required>
-                                <div id="erroDataInicio" class="error-message"></div>
-                            </div>
-                            <div class="form-group">
-                                <label for="horaInicio">Hora Início:</label>
-                                <input type="time" id="horaInicio" required>
-                                <div id="erroHoraInicio" class="error-message"></div>
-                            </div>
-                        </div>
+                        <label for="dataHoraInicio">Data e Hora de Início:</label>
+                        <input type="datetime-local" id="dataHoraInicio" required>
                     </div>
                     
                     <div class="form-group">
-                        <h3 class="section-title">Data e Hora de Término</h3>
-                        <div class="datetime-group">
-                            <div class="form-group">
-                                <label for="dataFim">Data Término:</label>
-                                <input type="date" id="dataFim" required>
-                                <div id="erroDataFim" class="error-message"></div>
-                            </div>
-                            <div class="form-group">
-                                <label for="horaFim">Hora Término:</label>
-                                <input type="time" id="horaFim" required>
-                                <div id="erroHoraFim" class="error-message"></div>
-                            </div>
-                        </div>
+                        <label for="dataHoraFim">Data e Hora de Término:</label>
+                        <input type="datetime-local" id="dataHoraFim" required>
                     </div>
                 </div>
+                
                 <div id="erroGeral" class="error-message" style="text-align: center; margin: 15px 0;"></div>
-                <button class="btn btn-success" onclick="adicionarAgendamento()">
-                    💾 Salvar na Planilha Google
-                </button>
-                <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')" style="margin-left: 10px;">
-                    📊 Ver Planilha
-                </button>
+                
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="adicionarAgendamento()">
+                        💾 Salvar na Planilha Google
+                    </button>
+                    <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')">
+                        📊 Ver Planilha
+                    </button>
+                    <button class="btn" onclick="carregarAgendamentos()">
+                        🔄 Atualizar Lista
+                    </button>
+                </div>
             </section>
 
             <section class="agendamentos-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>📋 Agendamentos</h2>
-                    <button class="btn" onclick="carregarAgendamentos()">
-                        🔄 Atualizar
-                    </button>
+                    <span id="contador-agendamentos" style="color: #666; font-weight: 600;"></span>
                 </div>
                 <div id="agendamentos-container">
                     <div class="loading">
@@ -222,57 +203,49 @@
         });
 
         function configurarDatasIniciais() {
-            const hoje = new Date();
-            const hojeFormatada = hoje.toISOString().split('T')[0];
+            const agora = new Date();
             
-            // Data de início: hoje
-            document.getElementById('dataInicio').min = hojeFormatada;
-            document.getElementById('dataInicio').value = hojeFormatada;
+            // Data de início: agora + 1 hora
+            const inicio = new Date(agora.getTime() + 60 * 60 * 1000);
+            // Data de fim: agora + 2 horas
+            const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
             
-            // Data de fim: hoje (inicialmente)
-            document.getElementById('dataFim').min = hojeFormatada;
-            document.getElementById('dataFim').value = hojeFormatada;
+            // Formatar para datetime-local (YYYY-MM-DDTHH:mm)
+            document.getElementById('dataHoraInicio').value = formatarParaDateTimeLocal(inicio);
+            document.getElementById('dataHoraFim').value = formatarParaDateTimeLocal(fim);
             
-            // Horários padrão - início em 1 hora, fim em 2 horas
-            const inicioPadrao = new Date(hoje.getTime() + 60 * 60 * 1000);
-            const fimPadrao = new Date(inicioPadrao.getTime() + 60 * 60 * 1000);
+            // Adicionar validação em tempo real
+            document.getElementById('dataHoraInicio').addEventListener('change', validarDatas);
+            document.getElementById('dataHoraFim').addEventListener('change', validarDatas);
+        }
+
+        function formatarParaDateTimeLocal(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            const horas = String(data.getHours()).padStart(2, '0');
+            const minutos = String(data.getMinutes()).padStart(2, '0');
             
-            document.getElementById('horaInicio').value = inicioPadrao.toTimeString().slice(0, 5);
-            document.getElementById('horaFim').value = fimPadrao.toTimeString().slice(0, 5);
-            
-            // Adicionar event listeners para validação em tempo real
-            document.getElementById('dataInicio').addEventListener('change', validarDatas);
-            document.getElementById('horaInicio').addEventListener('change', validarDatas);
-            document.getElementById('dataFim').addEventListener('change', validarDatas);
-            document.getElementById('horaFim').addEventListener('change', validarDatas);
+            return `${ano}-${mes}-${dia}T${horas}:${minutos}`;
         }
 
         function validarDatas() {
-            const dataInicio = document.getElementById('dataInicio').value;
-            const horaInicio = document.getElementById('horaInicio').value;
-            const dataFim = document.getElementById('dataFim').value;
-            const horaFim = document.getElementById('horaFim').value;
+            const dataHoraInicio = document.getElementById('dataHoraInicio').value;
+            const dataHoraFim = document.getElementById('dataHoraFim').value;
             
-            // Limpar erros anteriores
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-                el.textContent = '';
-            });
+            // Limpar erro anterior
+            document.getElementById('erroGeral').style.display = 'none';
             
-            if (!dataInicio || !horaInicio || !dataFim || !horaFim) {
-                return true; // Campos não preenchidos ainda
+            if (!dataHoraInicio || !dataHoraFim) {
+                return true;
             }
             
-            // Criar objetos Date para comparação
-            const inicio = new Date(`${dataInicio}T${horaInicio}`);
-            const fim = new Date(`${dataFim}T${horaFim}`);
+            const inicio = new Date(dataHoraInicio);
+            const fim = new Date(dataHoraFim);
             
-            // Validar se data de fim é posterior à data de início
             if (fim <= inicio) {
-                document.getElementById('erroDataFim').textContent = 'A data de término deve ser posterior à data de início';
-                document.getElementById('erroDataFim').style.display = 'block';
-                document.getElementById('erroHoraFim').textContent = 'A hora de término deve ser posterior à hora de início';
-                document.getElementById('erroHoraFim').style.display = 'block';
+                document.getElementById('erroGeral').textContent = '❌ A data e hora de término devem ser posteriores à data e hora de início!';
+                document.getElementById('erroGeral').style.display = 'block';
                 return false;
             }
             
@@ -282,6 +255,7 @@
         async function carregarAgendamentos() {
             const container = document.getElementById('agendamentos-container');
             const statusDiv = document.getElementById('api-status');
+            const contador = document.getElementById('contador-agendamentos');
             
             container.innerHTML = `
                 <div class="loading">
@@ -306,12 +280,14 @@
                 console.log(`✅ ${agendamentos.length} agendamentos carregados:`, data);
                 
                 statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
+                contador.textContent = `${agendamentos.length} agendamentos`;
                 exibirAgendamentos(agendamentos);
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar:', error);
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao carregar dados';
+                contador.textContent = 'Erro ao carregar';
                 
                 container.innerHTML = `
                     <div class="empty-state">
@@ -365,7 +341,7 @@
                     <div class="agendamento-card">
                         <h3>${ag.sala}</h3>
                         <div style="margin-bottom: 15px;">
-                            <p><strong>Professor:</strong> ${ag.professor}</p>
+                            <p><strong>Nome:</strong> ${ag.professor}</p>
                             <p><strong>Início:</strong> ${inicio}</p>
                             <p><strong>Término:</strong> ${fim}</p>
                             <p><strong>Status:</strong> ${statusText}</p>
@@ -380,20 +356,15 @@
 
         async function adicionarAgendamento() {
             const sala = document.getElementById('sala').value;
-            const professor = document.getElementById('professor').value;
-            const dataInicio = document.getElementById('dataInicio').value;
-            const horaInicio = document.getElementById('horaInicio').value;
-            const dataFim = document.getElementById('dataFim').value;
-            const horaFim = document.getElementById('horaFim').value;
+            const nome = document.getElementById('nome').value;
+            const dataHoraInicio = document.getElementById('dataHoraInicio').value;
+            const dataHoraFim = document.getElementById('dataHoraFim').value;
 
-            // Limpar erros anteriores
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-                el.textContent = '';
-            });
+            // Limpar erro anterior
+            document.getElementById('erroGeral').style.display = 'none';
 
             // Validações básicas
-            if (!sala || !professor || !dataInicio || !horaInicio || !dataFim || !horaFim) {
+            if (!sala || !nome || !dataHoraInicio || !dataHoraFim) {
                 document.getElementById('erroGeral').textContent = '❌ Por favor, preencha todos os campos!';
                 document.getElementById('erroGeral').style.display = 'block';
                 return;
@@ -401,18 +372,16 @@
 
             // Validar datas
             if (!validarDatas()) {
-                document.getElementById('erroGeral').textContent = '❌ Corrija os erros nas datas antes de salvar';
-                document.getElementById('erroGeral').style.display = 'block';
                 return;
             }
 
             // ✅ Converter para formato "DD/MM/YYYY HH:mm" que o backend espera
-            const dataInicioFormatada = formatarDataParaBackend(dataInicio, horaInicio);
-            const dataFimFormatada = formatarDataParaBackend(dataFim, horaFim);
+            const dataInicioFormatada = formatarDataParaBackend(dataHoraInicio);
+            const dataFimFormatada = formatarDataParaBackend(dataHoraFim);
 
             const novoAgendamento = {
                 sala: sala,
-                professor: professor,
+                professor: nome,
                 inicio: dataInicioFormatada, // Formato: "28/10/2025 14:30"
                 fim: dataFimFormatada       // Formato: "28/10/2025 16:30"
             };
@@ -441,8 +410,8 @@
                     document.getElementById('erroGeral').style.background = '#d4edda';
                     document.getElementById('erroGeral').style.border = '1px solid #c3e6cb';
                     
-                    // Limpar formulário (apenas alguns campos)
-                    document.getElementById('professor').value = '';
+                    // Limpar formulário
+                    document.getElementById('nome').value = '';
                     
                     // Recarregar lista após 2 segundos
                     setTimeout(() => {
@@ -465,17 +434,18 @@
         }
 
         // ✅ FUNÇÃO: Converter data para formato "DD/MM/YYYY HH:mm"
-        function formatarDataParaBackend(dataString, horaString) {
+        function formatarDataParaBackend(dataHoraString) {
             try {
-                // dataString vem como "YYYY-MM-DD", horaString como "HH:mm"
-                const [ano, mes, dia] = dataString.split('-');
-                const [horas, minutos] = horaString.split(':');
+                // dataHoraString vem como "YYYY-MM-DDTHH:mm"
+                const [dataParte, tempoParte] = dataHoraString.split('T');
+                const [ano, mes, dia] = dataParte.split('-');
+                const [horas, minutos] = tempoParte.split(':');
                 
                 // Formato: "DD/MM/YYYY HH:mm"
                 return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
             } catch (error) {
                 console.error('Erro ao formatar data:', error);
-                return dataString + ' ' + horaString; // Fallback
+                return dataHoraString; // Fallback
             }
         }
 
