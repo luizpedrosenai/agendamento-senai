@@ -164,14 +164,14 @@
     </div>
 
     <script>
-        // ✅ NOVA URL DA API - VERSÃO 4
+        // ✅ URL DA API FUNCIONAL
         const API_URL = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
         const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
         
         let agendamentos = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema iniciado - Nova API Versão 4!');
+            console.log('🚀 Sistema iniciado - Google Sheets conectado!');
             
             // Configurar data como hoje
             const hoje = new Date().toISOString().split('T')[0];
@@ -202,9 +202,9 @@
             `;
             
             try {
-                statusDiv.innerHTML = '🔄 Conectando com Google Sheets...';
+                statusDiv.innerHTML = '🔄 Carregando agendamentos...';
                 
-                console.log('📡 Conectando com API Versão 4:', API_URL);
+                console.log('📡 Conectando com Google Sheets...');
                 const response = await fetch(API_URL);
                 
                 if (!response.ok) {
@@ -214,7 +214,7 @@
                 const data = await response.json();
                 agendamentos = Array.isArray(data) ? data : [];
                 
-                console.log(`✅ ${agendamentos.length} agendamentos carregados`);
+                console.log(`✅ ${agendamentos.length} agendamentos carregados:`, data);
                 
                 statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
                 exibirAgendamentos(agendamentos);
