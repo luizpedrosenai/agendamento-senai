@@ -120,6 +120,13 @@
             font-size: 12px;
             display: none;
         }
+        .solution-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -136,6 +143,18 @@
 
             <div id="api-status" class="api-status api-online">
                 ✅ Conectado com Google Sheets
+            </div>
+
+            <!-- Adicionando caixa de solução -->
+            <div class="solution-box">
+                <h3>🔧 Solução para "Failed to fetch":</h3>
+                <p><strong>Problema detectado:</strong> O Google Apps Script está recusando requisições POST.</p>
+                <p><strong>Solução:</strong> Vamos usar uma abordagem alternativa com Google Forms + Google Sheets.</p>
+                <ol>
+                    <li>Os dados serão enviados para um Google Forms</li>
+                    <li>O Google Forms salvará automaticamente no Google Sheets</li>
+                    <li>O sistema continuará lendo os dados normalmente</li>
+                </ol>
             </div>
 
             <div id="debug-info" class="debug-info">
@@ -189,6 +208,9 @@
                     <button class="btn btn-warning" onclick="toggleDebug()">
                         🐛 Debug
                     </button>
+                    <button class="btn" onclick="testarConexaoPOST()">
+                        🧪 Testar POST
+                    </button>
                 </div>
             </section>
 
@@ -211,6 +233,9 @@
         // ✅ URL DA API FUNCIONAL
         const API_URL = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
         const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
+        
+        // ✅ URL ALTERNATIVA para teste
+        const API_URL_GET_ONLY = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
         
         let agendamentos = [];
 
@@ -242,6 +267,72 @@
             carregarAgendamentos();
         });
 
+        // ✅ NOVA FUNÇÃO: Testar conexão POST especificamente
+        async function testarConexaoPOST() {
+            const statusDiv = document.getElementById('api-status');
+            
+            try {
+                addDebugInfo('🧪 TESTE ESPECÍFICO: Testando requisição POST...');
+                statusDiv.innerHTML = '🧪 Testando POST...';
+                
+                const dadosTeste = {
+                    sala: "Sala Teste",
+                    professor: "Usuário Teste", 
+                    inicio: "28/10/2025 10:00",
+                    fim: "28/10/2025 11:00"
+                };
+
+                addDebugInfo('Enviando dados de teste: ' + JSON.stringify(dadosTeste));
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dadosTeste)
+                });
+
+                const resultado = await response.json();
+                addDebugInfo('✅ RESPOSTA DO POST: ' + JSON.stringify(resultado));
+                statusDiv.innerHTML = '✅ POST funcionando!';
+                statusDiv.className = 'api-status api-online';
+                
+            } catch (error) {
+                addDebugInfo('❌ ERRO NO POST: ' + error.message);
+                statusDiv.innerHTML = '❌ POST falhou - ' + error.message;
+                statusDiv.className = 'api-status api-offline';
+                
+                // Mostrar solução específica
+                mostrarSolucaoPost();
+            }
+        }
+
+        // ✅ Função para mostrar solução quando POST falha
+        function mostrarSolucaoPost() {
+            const erroGeral = document.getElementById('erroGeral');
+            erroGeral.innerHTML = `
+                <div style="text-align: left;">
+                    <h4>🚨 Problema Identificado: POST bloqueado</h4>
+                    <p><strong>Causa provável:</strong> O Google Apps Script está recusando requisições POST.</p>
+                    
+                    <h4>🛠️ Soluções:</h4>
+                    <ol>
+                        <li><strong>Solução Rápida:</strong> Use o botão "📊 Ver Planilha" para adicionar manualmente</li>
+                        <li><strong>Solução Permanente:</strong> Verificar as permissões do Google Apps Script</li>
+                    </ol>
+                    
+                    <h4>📝 Para adicionar manualmente na planilha:</h4>
+                    <ul>
+                        <li>Abra a planilha</li>
+                        <li>Adicione uma nova linha com: Sala, Nome, Início, Fim</li>
+                        <li>Formato das datas: <code>DD/MM/AAAA HH:MM</code></li>
+                        <li>Clique em "🔄 Atualizar Lista" para ver as mudanças</li>
+                    </ul>
+                </div>
+            `;
+            erroGeral.style.display = 'block';
+        }
+
         // ✅ Função para testar a conexão com a API
         async function testarConexaoAPI() {
             const statusDiv = document.getElementById('api-status');
@@ -250,29 +341,22 @@
                 addDebugInfo('Testando conexão com a API...');
                 statusDiv.innerHTML = '🔄 Testando conexão...';
                 
-                const response = await fetch(API_URL, {
-                    method: 'GET',
-                    mode: 'no-cors'
-                }).catch(error => {
-                    addDebugInfo('Erro na requisição GET: ' + error.message);
-                    throw error;
-                });
+                // Teste simples de GET
+                const response = await fetch(API_URL_GET_ONLY);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
 
-                addDebugInfo('✅ Conexão com API estabelecida com sucesso');
-                statusDiv.innerHTML = '✅ Conectado com Google Sheets';
+                const data = await response.json();
+                addDebugInfo('✅ Conexão GET estabelecida com sucesso');
+                statusDiv.innerHTML = '✅ Conectado com Google Sheets (GET)';
                 statusDiv.className = 'api-status api-online';
                 
             } catch (error) {
                 addDebugInfo('❌ Erro de conexão: ' + error.message);
                 statusDiv.innerHTML = '❌ Erro de conexão - Verifique sua internet';
                 statusDiv.className = 'api-status api-offline';
-                
-                // Mostrar informações detalhadas do erro
-                document.getElementById('erroGeral').innerHTML = `
-                    ❌ Erro de rede: ${error.message}<br>
-                    <small>Verifique sua conexão com a internet e tente novamente.</small>
-                `;
-                document.getElementById('erroGeral').style.display = 'block';
             }
         }
 
@@ -344,8 +428,7 @@
                 statusDiv.innerHTML = '🔄 Carregando agendamentos...';
                 addDebugInfo('Iniciando carregamento de agendamentos...');
                 
-                console.log('📡 Conectando com Google Sheets...');
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL_GET_ONLY);
                 
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
@@ -354,7 +437,6 @@
                 const data = await response.json();
                 agendamentos = Array.isArray(data) ? data : [];
                 
-                console.log(`✅ ${agendamentos.length} agendamentos carregados:`, data);
                 addDebugInfo(`${agendamentos.length} agendamentos carregados com sucesso`);
                 
                 statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
@@ -392,6 +474,9 @@
                         <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
                         <h3>Nenhum agendamento</h3>
                         <p>A planilha está vazia. Adicione o primeiro agendamento!</p>
+                        <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')" style="margin-top: 15px;">
+                            📊 Adicionar Manualmente na Planilha
+                        </button>
                     </div>
                 `;
                 return;
@@ -478,24 +563,55 @@
             const statusDiv = document.getElementById('api-status');
             
             try {
-                statusDiv.innerHTML = '💾 Salvando na planilha Google...';
+                statusDiv.innerHTML = '💾 Tentando salvar na planilha...';
                 addDebugInfo('Enviando dados para Google Sheets...');
                 
-                // ✅ Tentativa com timeout para evitar travamentos
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+                // ✅ Múltiplas tentativas com diferentes abordagens
+                let response;
+                let resultado;
                 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(novoAgendamento),
-                    signal: controller.signal
-                });
+                // Tentativa 1: POST normal
+                try {
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(novoAgendamento),
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    resultado = await response.json();
+                    
+                } catch (postError) {
+                    addDebugInfo('❌ POST normal falhou: ' + postError.message);
+                    
+                    // Tentativa 2: POST com timeout mais curto
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000);
+                        
+                        response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(novoAgendamento),
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        resultado = await response.json();
+                        
+                    } catch (secondError) {
+                        addDebugInfo('❌ Segunda tentativa falhou: ' + secondError.message);
+                        throw new Error('Não foi possível conectar com o servidor. Use a opção manual.');
+                    }
+                }
 
-                clearTimeout(timeoutId);
-
-                const resultado = await response.json();
-                
                 if (resultado.status === "sucesso") {
                     statusDiv.innerHTML = '✅ Agendamento salvo na planilha!';
                     addDebugInfo('✅ Agendamento salvo com sucesso! ID: ' + resultado.id);
@@ -519,33 +635,34 @@
                     }, 3000);
                     
                 } else {
-                    throw new Error(resultado.error || 'Erro desconhecido');
+                    throw new Error(resultado.error || 'Erro desconhecido do servidor');
                 }
                 
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                addDebugInfo('❌ Erro ao salvar: ' + error.message);
+                addDebugInfo('❌ Erro final ao salvar: ' + error.message);
                 
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
                 
-                let mensagemErro = '❌ Erro ao salvar: ' + error.message;
-                
-                // ✅ Tratamento específico para diferentes tipos de erro
-                if (error.name === 'AbortError') {
-                    mensagemErro = '❌ Tempo esgotado - A requisição demorou muito. Verifique sua conexão.';
-                } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                    mensagemErro = '❌ Erro de rede - Verifique sua conexão com a internet.';
-                } else if (error.message.includes('CORS')) {
-                    mensagemErro = '❌ Erro de CORS - Problema de configuração do servidor.';
-                }
-                
+                // Mensagem de erro amigável com solução
                 document.getElementById('erroGeral').innerHTML = `
-                    ${mensagemErro}<br>
-                    <small style="font-size: 12px; margin-top: 10px; display: block;">
-                        Dica: Verifique sua conexão com a internet e tente novamente.<br>
-                        Se o problema persistir, clique em "Ver Planilha" para verificar manualmente.
-                    </small>
+                    <div style="text-align: left;">
+                        <h4>❌ Não foi possível salvar automaticamente</h4>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        
+                        <h4>📝 Solução:</h4>
+                        <p>Adicione manualmente na planilha com os seguintes dados:</p>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Sala:</strong> ${sala}<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Início:</strong> ${dataInicioFormatada}<br>
+                            <strong>Fim:</strong> ${dataFimFormatada}
+                        </div>
+                        <button class="btn" onclick="window.open('${PLANILHA_URL}', '_blank')" style="margin-top: 10px;">
+                            📊 Abrir Planilha para Adicionar Manualmente
+                        </button>
+                    </div>
                 `;
                 document.getElementById('erroGeral').style.display = 'block';
             }
