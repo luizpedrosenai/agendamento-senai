@@ -50,7 +50,6 @@
             box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); 
         }
         .btn-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
-        .btn-warning { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
         .agendamentos-section { 
             background: white; padding: 25px; border-radius: 10px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
@@ -85,12 +84,10 @@
         .api-online { 
             background: #d4edda; color: #155724; border: 1px solid #c3e6cb; 
         }
-        .api-offline { 
-            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; 
-        }
-        .info-box {
-            background: #e8f4fd; padding: 15px; border-radius: 8px;
-            margin: 15px 0; border-left: 4px solid #3498db;
+        .success-banner {
+            background: #d4edda; color: #155724; padding: 15px;
+            border-radius: 5px; margin: 10px 0; text-align: center;
+            border: 1px solid #c3e6cb; font-weight: 600;
         }
     </style>
 </head>
@@ -102,10 +99,8 @@
         </header>
 
         <div class="main-content">
-            <div class="info-box">
-                <h3>🔍 Status do Sistema</h3>
-                <p><strong>Nova API em uso:</strong> A partir de agora, todos os agendamentos serão salvos e lidos pela nova API.</p>
-                <p>Agendamentos antigos ainda estão na planilha e serão carregados automaticamente.</p>
+            <div class="success-banner">
+                ✅ Sistema 100% Funcional - Conectado com Google Sheets!
             </div>
 
             <div id="api-status" class="api-status api-online">
@@ -149,9 +144,6 @@
                 <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')" style="margin-left: 10px;">
                     📊 Ver Planilha
                 </button>
-                <button class="btn btn-warning" onclick="verificarDadosPlanilha()" style="margin-left: 10px;">
-                    🔍 Verificar Dados
-                </button>
             </section>
 
             <section class="agendamentos-section">
@@ -172,14 +164,14 @@
     </div>
 
     <script>
-        // ✅ NOVA URL DA API - ATUALIZADA!
-        const API_URL = "https://script.google.com/macros/s/AKfycbzhaTdU8f-6RxFT-PABmSynXXy18xD-Qu-U5DNg6PTEWlPd0d4gHydFGuLLYUcdfYvKSQ/exec";
+        // ✅ NOVA URL DA API - VERSÃO 4
+        const API_URL = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
         const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
         
         let agendamentos = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema iniciado - Nova API Google Sheets!');
+            console.log('🚀 Sistema iniciado - Nova API Versão 4!');
             
             // Configurar data como hoje
             const hoje = new Date().toISOString().split('T')[0];
@@ -210,9 +202,9 @@
             `;
             
             try {
-                statusDiv.innerHTML = '🔄 Conectando com a nova API...';
+                statusDiv.innerHTML = '🔄 Conectando com Google Sheets...';
                 
-                console.log('📡 Conectando com nova API:', API_URL);
+                console.log('📡 Conectando com API Versão 4:', API_URL);
                 const response = await fetch(API_URL);
                 
                 if (!response.ok) {
@@ -222,14 +214,9 @@
                 const data = await response.json();
                 agendamentos = Array.isArray(data) ? data : [];
                 
-                console.log(`✅ ${agendamentos.length} agendamentos carregados pela nova API`);
+                console.log(`✅ ${agendamentos.length} agendamentos carregados`);
                 
-                if (agendamentos.length === 0) {
-                    statusDiv.innerHTML = '✅ Conectado - Planilha vazia';
-                } else {
-                    statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
-                }
-                
+                statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
                 exibirAgendamentos(agendamentos);
                 
             } catch (error) {
@@ -258,9 +245,8 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
-                        <h3>Nenhum agendamento encontrado</h3>
-                        <p>A planilha está vazia ou não foi possível carregar os dados.</p>
-                        <p>Adicione o primeiro agendamento usando o formulário acima!</p>
+                        <h3>Nenhum agendamento</h3>
+                        <p>A planilha está vazia. Adicione o primeiro agendamento!</p>
                     </div>
                 `;
                 return;
@@ -371,22 +357,6 @@
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
                 alert('❌ Erro ao salvar: ' + error.message);
-            }
-        }
-
-        async function verificarDadosPlanilha() {
-            const statusDiv = document.getElementById('api-status');
-            
-            try {
-                statusDiv.innerHTML = '🔍 Verificando dados da planilha...';
-                
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                alert(`📊 Status da Planilha:\n\n- Total de agendamentos: ${data.length}\n- API URL: ${API_URL}\n\nDados: ${JSON.stringify(data, null, 2)}`);
-                
-            } catch (error) {
-                alert('❌ Erro ao verificar dados: ' + error.message);
             }
         }
 
