@@ -97,30 +97,75 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        .dias-checkbox {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 5px;
+        /* NOVO ESTILO PARA DROPDOWN DE DIAS */
+        .dropdown-dias {
+            position: relative;
         }
 
-        .dia-option {
+        .dropdown-trigger {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .dropdown-trigger::after {
+            content: '▼';
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-trigger.active::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-options.show {
+            display: block;
+        }
+
+        .dropdown-option {
+            padding: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e1e8ed;
+            gap: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f1f1;
         }
 
-        .dia-option:hover {
-            background: #e9ecef;
+        .dropdown-option:last-child {
+            border-bottom: none;
         }
 
-        .dia-option input[type="checkbox"] {
+        .dropdown-option:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-option input[type="checkbox"] {
             margin: 0;
             width: 16px;
             height: 16px;
@@ -213,7 +258,7 @@
             gap: 10px;
         }
 
-        /* NOVO LAYOUT - SALAS EM SEQUÊNCIA */
+        /* LAYOUT - SALAS EM SEQUÊNCIA */
         .salas-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -411,10 +456,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .dias-checkbox {
-                grid-template-columns: 1fr;
-            }
-
             .filtros-grid {
                 grid-template-columns: 1fr;
             }
@@ -468,25 +509,30 @@
                     </div>
                     <div class="form-group">
                         <label>Dias da Semana:</label>
-                        <div class="dias-checkbox">
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Segunda-feira"> Segunda-feira
-                            </label>
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Terça-feira"> Terça-feira
-                            </label>
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Quarta-feira"> Quarta-feira
-                            </label>
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Quinta-feira"> Quinta-feira
-                            </label>
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Sexta-feira"> Sexta-feira
-                            </label>
-                            <label class="dia-option">
-                                <input type="checkbox" name="diaSemana" value="Sábado"> Sábado
-                            </label>
+                        <div class="dropdown-dias">
+                            <div class="dropdown-trigger" id="dropdownTrigger">
+                                Selecione os dias...
+                            </div>
+                            <div class="dropdown-options" id="dropdownOptions">
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Segunda-feira"> Segunda-feira
+                                </label>
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Terça-feira"> Terça-feira
+                                </label>
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Quarta-feira"> Quarta-feira
+                                </label>
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Quinta-feira"> Quinta-feira
+                                </label>
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Sexta-feira"> Sexta-feira
+                                </label>
+                                <label class="dropdown-option">
+                                    <input type="checkbox" name="diaSemana" value="Sábado"> Sábado
+                                </label>
+                            </div>
                         </div>
                         <div id="dias-selecionados" class="dias-selecionados" style="display: none;">
                             <strong>Dias selecionados:</strong> <span id="dias-texto"></span>
@@ -604,23 +650,56 @@
             document.getElementById('inicio').min = dataMinima;
             document.getElementById('fim').min = dataMinima;
 
-            // Atualizar display dos dias selecionados
-            document.querySelectorAll('input[name="diaSemana"]').forEach(checkbox => {
-                checkbox.addEventListener('change', atualizarDiasSelecionados);
-            });
+            // Configurar dropdown de dias
+            configurarDropdownDias();
         });
+
+        function configurarDropdownDias() {
+            const dropdownTrigger = document.getElementById('dropdownTrigger');
+            const dropdownOptions = document.getElementById('dropdownOptions');
+            const checkboxes = dropdownOptions.querySelectorAll('input[type="checkbox"]');
+
+            // Abrir/fechar dropdown
+            dropdownTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownOptions.classList.toggle('show');
+                dropdownTrigger.classList.toggle('active');
+            });
+
+            // Atualizar texto do trigger quando checkboxes mudarem
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    atualizarDiasSelecionados();
+                    // Não fechar o dropdown quando selecionar uma opção
+                });
+            });
+
+            // Fechar dropdown quando clicar fora
+            document.addEventListener('click', function() {
+                dropdownOptions.classList.remove('show');
+                dropdownTrigger.classList.remove('active');
+            });
+
+            // Prevenir fechamento quando clicar dentro do dropdown
+            dropdownOptions.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
 
         function atualizarDiasSelecionados() {
             const diasSelecionados = Array.from(document.querySelectorAll('input[name="diaSemana"]:checked'))
                 .map(cb => cb.value);
             
+            const dropdownTrigger = document.getElementById('dropdownTrigger');
             const diasContainer = document.getElementById('dias-selecionados');
             const diasTexto = document.getElementById('dias-texto');
             
             if (diasSelecionados.length > 0) {
+                dropdownTrigger.textContent = `${diasSelecionados.length} dia(s) selecionado(s)`;
                 diasTexto.textContent = diasSelecionados.join(', ');
                 diasContainer.style.display = 'block';
             } else {
+                dropdownTrigger.textContent = 'Selecione os dias...';
                 diasContainer.style.display = 'none';
             }
         }
@@ -930,6 +1009,7 @@
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
                 document.getElementById('dias-selecionados').style.display = 'none';
+                document.getElementById('dropdownTrigger').textContent = 'Selecione os dias...';
 
                 // Recarregar
                 carregarAgendamentos();
@@ -961,6 +1041,7 @@
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
                 document.getElementById('dias-selecionados').style.display = 'none';
+                document.getElementById('dropdownTrigger').textContent = 'Selecione os dias...';
                 carregarAgendamentos();
             }
         }
