@@ -286,6 +286,15 @@
             font-weight: 600;
             font-size: 1.3em;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sala-nome-periodo {
+            font-size: 1.1em;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         .sala-content {
@@ -306,36 +315,6 @@
         .agendamento-item:hover {
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        /* NOVO ESTILO PARA O TÍTULO DO CARTÃO */
-        .agendamento-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .agendamento-titulo {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .sala-nome {
-            text-transform: uppercase;
-            font-weight: 800;
-        }
-
-        .periodo-badge {
-            background: rgba(255,255,255,0.9);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .agendamento-info p {
@@ -505,12 +484,6 @@
 
             .main-content {
                 padding: 20px;
-            }
-
-            .agendamento-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
             }
         }
     </style>
@@ -870,84 +843,83 @@
                 return;
             }
 
-            // Agrupar agendamentos por sala
-            const agendamentosPorSala = {};
-            ordemSalas.forEach(sala => {
-                agendamentosPorSala[sala] = [];
-            });
-
+            // Agrupar agendamentos por sala e período
+            const agendamentosPorSalaPeriodo = {};
+            
             agendamentos.forEach(ag => {
-                if (agendamentosPorSala[ag.sala]) {
-                    agendamentosPorSala[ag.sala].push(ag);
+                const chave = `${ag.sala}|${ag.periodo}`;
+                if (!agendamentosPorSalaPeriodo[chave]) {
+                    agendamentosPorSalaPeriodo[chave] = [];
                 }
-            });
-
-            // Ordenar agendamentos de cada sala por data
-            ordemSalas.forEach(sala => {
-                agendamentosPorSala[sala].sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+                agendamentosPorSalaPeriodo[chave].push(ag);
             });
 
             // Gerar HTML
             let html = '<div class="salas-grid">';
 
-            ordemSalas.forEach(sala => {
-                const agendamentosSala = agendamentosPorSala[sala];
-                if (agendamentosSala.length === 0 && document.getElementById('filtroSala').value) {
-                    return; // Não mostrar salas vazias quando há filtro ativo
+            // Ordenar por sala e período
+            const chavesOrdenadas = Object.keys(agendamentosPorSalaPeriodo).sort((a, b) => {
+                const [salaA, periodoA] = a.split('|');
+                const [salaB, periodoB] = b.split('|');
+                
+                // Ordenar por sala primeiro
+                const indexA = ordemSalas.indexOf(salaA);
+                const indexB = ordemSalas.indexOf(salaB);
+                
+                if (indexA !== indexB) {
+                    return indexA - indexB;
                 }
+                
+                // Se for a mesma sala, ordenar por período
+                const ordemPeriodos = ['Manhã', 'Tarde', 'Noite'];
+                return ordemPeriodos.indexOf(periodoA) - ordemPeriodos.indexOf(periodoB);
+            });
+
+            chavesOrdenadas.forEach(chave => {
+                const [sala, periodo] = chave.split('|');
+                const agendamentosSalaPeriodo = agendamentosPorSalaPeriodo[chave];
 
                 const classeSala = sala.toLowerCase().replace(' ', '-').replace('ó', 'o');
                 
                 html += `
                     <div class="sala-column ${classeSala}">
                         <div class="sala-header">
-                            ${sala}
+                            <div class="sala-nome-periodo">${sala.toUpperCase()} ${periodo}</div>
                         </div>
                         <div class="sala-content">
                 `;
 
-                if (agendamentosSala.length === 0) {
+                // Ordenar agendamentos por data
+                agendamentosSalaPeriodo.sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+
+                agendamentosSalaPeriodo.forEach(ag => {
+                    const inicio = formatarData(ag.inicio);
+                    const fim = formatarData(ag.fim);
+                    const agora = new Date();
+                    const dataInicio = new Date(ag.inicio);
+                    const status = dataInicio > agora ? 'disponivel' : 'ocupado';
+
                     html += `
-                        <div class="empty-state">
-                            <p>Nenhum agendamento</p>
+                        <div class="agendamento-item">
+                            <div class="status-indicator ${status === 'ocupado' ? 'status-ocupado' : 'status-disponivel'}"></div>
+                            <div class="agendamento-info">
+                                <p><strong>Professor:</strong> ${ag.professor}</p>
+                                <p><strong>Dia:</strong> ${ag.diaSemana}</p>
+                                <p><strong>Início:</strong> ${inicio}</p>
+                                <p><strong>Término:</strong> ${fim}</p>
+                                <p>
+                                    <span class="status-indicator ${status === 'disponivel' ? 'status-disponivel' : 'status-ocupado'}"></span>
+                                    <strong>Status:</strong> ${status === 'disponivel' ? 'Disponível' : 'Em andamento'}
+                                </p>
+                            </div>
+                            <div class="agendamento-actions">
+                                <button class="btn btn-small btn-delete" onclick="deletarAgendamento(${ag.id})">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
                         </div>
                     `;
-                } else {
-                    agendamentosSala.forEach(ag => {
-                        const inicio = formatarData(ag.inicio);
-                        const fim = formatarData(ag.fim);
-                        const agora = new Date();
-                        const dataInicio = new Date(ag.inicio);
-                        const status = dataInicio > agora ? 'disponivel' : 'ocupado';
-
-                        html += `
-                            <div class="agendamento-item">
-                                <div class="status-indicator ${status === 'ocupado' ? 'status-ocupado' : 'status-disponivel'}"></div>
-                                <div class="agendamento-header">
-                                    <div class="agendamento-titulo">
-                                        <span class="sala-nome">${ag.sala.toUpperCase()}</span>
-                                    </div>
-                                    <div class="periodo-badge">${ag.periodo}</div>
-                                </div>
-                                <div class="agendamento-info">
-                                    <p><strong>Professor:</strong> ${ag.professor}</p>
-                                    <p><strong>Dia:</strong> ${ag.diaSemana}</p>
-                                    <p><strong>Início:</strong> ${inicio}</p>
-                                    <p><strong>Término:</strong> ${fim}</p>
-                                    <p>
-                                        <span class="status-indicator ${status === 'disponivel' ? 'status-disponivel' : 'status-ocupado'}"></span>
-                                        <strong>Status:</strong> ${status === 'disponivel' ? 'Disponível' : 'Em andamento'}
-                                    </p>
-                                </div>
-                                <div class="agendamento-actions">
-                                    <button class="btn btn-small btn-delete" onclick="deletarAgendamento(${ag.id})">
-                                        🗑️ Excluir
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
+                });
 
                 html += `
                         </div>
