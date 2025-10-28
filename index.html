@@ -88,9 +88,6 @@
         .api-offline { 
             background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; 
         }
-        .api-warning { 
-            background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; 
-        }
         .success-banner {
             background: #d4edda; color: #155724; padding: 15px;
             border-radius: 5px; margin: 10px 0; text-align: center;
@@ -110,19 +107,9 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .debug-info {
-            background: #f8f9fa;
-            border: 1px solid #e1e8ed;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: monospace;
-            font-size: 12px;
-            display: none;
-        }
-        .solution-box {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
+        .test-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 8px;
             padding: 15px;
             margin: 15px 0;
@@ -133,32 +120,23 @@
     <div class="container">
         <header>
             <h1>🎓 Sistema de Agendamento SENAI</h1>
-            <p>Sistema Conectado com Google Sheets</p>
+            <p>🔥 VERSÃO TESTE - SEM DATAS</p>
         </header>
 
         <div class="main-content">
-            <div class="success-banner">
-                ✅ Sistema 100% Funcional - Conectado com Google Sheets!
+            <div class="test-info">
+                <h3>🧪 MODO TESTE ATIVADO</h3>
+                <p><strong>Objetivo:</strong> Testar envio de dados sem campos de data</p>
+                <p><strong>Status:</strong> Apenas Sala e Nome serão enviados</p>
+                <p><strong>URL API:</strong> Nova URL gerada - Deployment ID: AKfycbzhfQbibZXCXQhyi2Ytw4a9lr8iI-c91CeWMnXoUpy5LGwKn4zE8XYWQpajj26bkp-vZA</p>
             </div>
 
             <div id="api-status" class="api-status api-online">
                 ✅ Conectado com Google Sheets
             </div>
 
-            <!-- Adicionando caixa de solução -->
-            <div class="solution-box">
-                <h3>🔧 Sistema Atualizado e Funcional!</h3>
-                <p><strong>Status:</strong> Conexão estabelecida com sucesso</p>
-                <p><strong>URL da API:</strong> Nova URL implantada e testada</p>
-            </div>
-
-            <div id="debug-info" class="debug-info">
-                <strong>Informações de Debug:</strong>
-                <div id="debug-content"></div>
-            </div>
-
             <section class="form-section">
-                <h2>➕ Novo Agendamento</h2>
+                <h2>➕ Novo Agendamento (TESTE)</h2>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="sala">Sala:</label>
@@ -176,32 +154,19 @@
                         <label for="nome">Nome:</label>
                         <input type="text" id="nome" placeholder="Seu nome completo" required>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="dataHoraInicio">Data e Hora de Início:</label>
-                        <input type="datetime-local" id="dataHoraInicio" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="dataHoraFim">Data e Hora de Término:</label>
-                        <input type="datetime-local" id="dataHoraFim" required>
-                    </div>
                 </div>
                 
                 <div id="erroGeral" class="error-message" style="text-align: center; margin: 15px 0;"></div>
                 
                 <div class="button-group">
                     <button class="btn btn-success" onclick="adicionarAgendamento()">
-                        💾 Salvar na Planilha Google
+                        💾 TESTAR Envio Simplificado
                     </button>
                     <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')">
                         📊 Ver Planilha
                     </button>
                     <button class="btn" onclick="carregarAgendamentos()">
                         🔄 Atualizar Lista
-                    </button>
-                    <button class="btn btn-warning" onclick="toggleDebug()">
-                        🐛 Debug
                     </button>
                     <button class="btn" onclick="testarConexaoPOST()">
                         🧪 Testar POST
@@ -225,56 +190,36 @@
     </div>
 
     <script>
-        // ✅ NOVA URL DA API ATUALIZADA
-        const API_URL = "https://script.google.com/macros/s/AKfycbw4uUtFw_fYsmPJmZGwDnMU9l7VAQFLEaRqSydb1gaWuOkHbi8FbqvGMrP_b3e5OzCA1A/exec";
+        // ✅ NOVA URL DA API ATUALIZADA - USE ESTA!
+        const API_URL = "https://script.google.com/macros/s/AKfycbzhfQbibZXCXQhyi2Ytw4a9lr8iI-c91CeWMnXoUpy5LGwKn4zE8XYWQpajj26bkp-vZA/exec";
         const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
         
         let agendamentos = [];
 
-        // ✅ Função para mostrar/ocultar informações de debug
-        function toggleDebug() {
-            const debugInfo = document.getElementById('debug-info');
-            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // ✅ Função para adicionar informações de debug
-        function addDebugInfo(message) {
-            const debugContent = document.getElementById('debug-content');
-            const timestamp = new Date().toLocaleTimeString();
-            debugContent.innerHTML += `<div><strong>[${timestamp}]</strong> ${message}</div>`;
-            console.log(`[DEBUG] ${message}`);
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema iniciado - Google Sheets conectado!');
-            addDebugInfo('Sistema iniciado - verificando conexão...');
+            console.log('🚀 Sistema TESTE iniciado - SEM DATAS');
+            console.log('📡 URL da API:', API_URL);
             
             // Testar conexão com a API
             testarConexaoAPI();
-            
-            // Configurar datas iniciais
-            configurarDatasIniciais();
             
             // Carregar agendamentos
             carregarAgendamentos();
         });
 
-        // ✅ NOVA FUNÇÃO: Testar conexão POST especificamente
+        // ✅ FUNÇÃO SIMPLIFICADA: Testar conexão POST
         async function testarConexaoPOST() {
             const statusDiv = document.getElementById('api-status');
             
             try {
-                addDebugInfo('🧪 TESTE ESPECÍFICO: Testando requisição POST...');
                 statusDiv.innerHTML = '🧪 Testando POST...';
                 
                 const dadosTeste = {
-                    sala: "Sala Teste",
-                    professor: "Usuário Teste", 
-                    inicio: "28/10/2024 10:00",
-                    fim: "28/10/2024 11:00"
+                    sala: "Sala Teste POST",
+                    professor: "Teste POST Simplificado"
                 };
 
-                addDebugInfo('Enviando dados de teste: ' + JSON.stringify(dadosTeste));
+                console.log('Enviando dados de teste:', dadosTeste);
                 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -285,48 +230,23 @@
                 });
 
                 const resultado = await response.json();
-                addDebugInfo('✅ RESPOSTA DO POST: ' + JSON.stringify(resultado));
+                console.log('✅ RESPOSTA:', resultado);
+                
                 statusDiv.innerHTML = '✅ POST funcionando!';
                 statusDiv.className = 'api-status api-online';
                 
                 if (resultado.status === "sucesso") {
-                    alert('✅ TESTE BEM-SUCEDIDO! Agendamento de teste salvo na planilha.');
+                    alert('✅ TESTE BEM-SUCEDIDO! Dados salvos na planilha.\n\nID: ' + resultado.id + '\nMensagem: ' + resultado.message);
+                    carregarAgendamentos(); // Atualizar lista
                 }
                 
             } catch (error) {
-                addDebugInfo('❌ ERRO NO POST: ' + error.message);
+                console.error('❌ ERRO NO POST:', error);
                 statusDiv.innerHTML = '❌ POST falhou - ' + error.message;
                 statusDiv.className = 'api-status api-offline';
                 
-                // Mostrar solução específica
-                mostrarSolucaoPost();
+                alert('❌ ERRO NO POST: ' + error.message);
             }
-        }
-
-        // ✅ Função para mostrar solução quando POST falha
-        function mostrarSolucaoPost() {
-            const erroGeral = document.getElementById('erroGeral');
-            erroGeral.innerHTML = `
-                <div style="text-align: left;">
-                    <h4>🚨 Problema Identificado: POST bloqueado</h4>
-                    <p><strong>Causa provável:</strong> O Google Apps Script está recusando requisições POST.</p>
-                    
-                    <h4>🛠️ Soluções:</h4>
-                    <ol>
-                        <li><strong>Solução Rápida:</strong> Use o botão "📊 Ver Planilha" para adicionar manualmente</li>
-                        <li><strong>Solução Permanente:</strong> Verificar as permissões do Google Apps Script</li>
-                    </ol>
-                    
-                    <h4>📝 Para adicionar manualmente na planilha:</h4>
-                    <ul>
-                        <li>Abra a planilha</li>
-                        <li>Adicione uma nova linha com: Sala, Nome, Início, Fim</li>
-                        <li>Formato das datas: <code>DD/MM/AAAA HH:MM</code></li>
-                        <li>Clique em "🔄 Atualizar Lista" para ver as mudanças</li>
-                    </ul>
-                </div>
-            `;
-            erroGeral.style.display = 'block';
         }
 
         // ✅ Função para testar a conexão com a API
@@ -334,10 +254,8 @@
             const statusDiv = document.getElementById('api-status');
             
             try {
-                addDebugInfo('Testando conexão com a API...');
                 statusDiv.innerHTML = '🔄 Testando conexão...';
                 
-                // Teste simples de GET
                 const response = await fetch(API_URL);
                 
                 if (!response.ok) {
@@ -345,67 +263,16 @@
                 }
 
                 const data = await response.json();
-                addDebugInfo('✅ Conexão GET estabelecida com sucesso');
-                statusDiv.innerHTML = '✅ Conectado com Google Sheets (GET)';
+                console.log('✅ Conexão GET estabelecida');
+                
+                statusDiv.innerHTML = '✅ Conectado com Google Sheets';
                 statusDiv.className = 'api-status api-online';
                 
             } catch (error) {
-                addDebugInfo('❌ Erro de conexão: ' + error.message);
-                statusDiv.innerHTML = '❌ Erro de conexão - Verifique sua internet';
+                console.error('❌ Erro de conexão:', error);
+                statusDiv.innerHTML = '❌ Erro de conexão';
                 statusDiv.className = 'api-status api-offline';
             }
-        }
-
-        function configurarDatasIniciais() {
-            const agora = new Date();
-            
-            // Data de início: agora + 1 hora
-            const inicio = new Date(agora.getTime() + 60 * 60 * 1000);
-            // Data de fim: agora + 2 horas
-            const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
-            
-            // Formatar para datetime-local (YYYY-MM-DDTHH:mm)
-            document.getElementById('dataHoraInicio').value = formatarParaDateTimeLocal(inicio);
-            document.getElementById('dataHoraFim').value = formatarParaDateTimeLocal(fim);
-            
-            // Adicionar validação em tempo real
-            document.getElementById('dataHoraInicio').addEventListener('change', validarDatas);
-            document.getElementById('dataHoraFim').addEventListener('change', validarDatas);
-            
-            addDebugInfo('Datas iniciais configuradas');
-        }
-
-        function formatarParaDateTimeLocal(data) {
-            const ano = data.getFullYear();
-            const mes = String(data.getMonth() + 1).padStart(2, '0');
-            const dia = String(data.getDate()).padStart(2, '0');
-            const horas = String(data.getHours()).padStart(2, '0');
-            const minutos = String(data.getMinutes()).padStart(2, '0');
-            
-            return `${ano}-${mes}-${dia}T${horas}:${minutos}`;
-        }
-
-        function validarDatas() {
-            const dataHoraInicio = document.getElementById('dataHoraInicio').value;
-            const dataHoraFim = document.getElementById('dataHoraFim').value;
-            
-            // Limpar erro anterior
-            document.getElementById('erroGeral').style.display = 'none';
-            
-            if (!dataHoraInicio || !dataHoraFim) {
-                return true;
-            }
-            
-            const inicio = new Date(dataHoraInicio);
-            const fim = new Date(dataHoraFim);
-            
-            if (fim <= inicio) {
-                document.getElementById('erroGeral').textContent = '❌ A data e hora de término devem ser posteriores à data e hora de início!';
-                document.getElementById('erroGeral').style.display = 'block';
-                return false;
-            }
-            
-            return true;
         }
 
         async function carregarAgendamentos() {
@@ -422,7 +289,6 @@
             
             try {
                 statusDiv.innerHTML = '🔄 Carregando agendamentos...';
-                addDebugInfo('Iniciando carregamento de agendamentos...');
                 
                 const response = await fetch(API_URL);
                 
@@ -433,7 +299,7 @@
                 const data = await response.json();
                 agendamentos = Array.isArray(data) ? data : [];
                 
-                addDebugInfo(`${agendamentos.length} agendamentos carregados com sucesso`);
+                console.log(`${agendamentos.length} agendamentos carregados`);
                 
                 statusDiv.innerHTML = `✅ ${agendamentos.length} agendamentos carregados`;
                 contador.textContent = `${agendamentos.length} agendamentos`;
@@ -441,7 +307,6 @@
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar:', error);
-                addDebugInfo('Erro ao carregar agendamentos: ' + error.message);
                 
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao carregar dados';
@@ -470,42 +335,22 @@
                         <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
                         <h3>Nenhum agendamento</h3>
                         <p>A planilha está vazia. Adicione o primeiro agendamento!</p>
-                        <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')" style="margin-top: 15px;">
-                            📊 Adicionar Manualmente na Planilha
-                        </button>
                     </div>
                 `;
                 return;
             }
 
-            // Ordenar por data mais recente primeiro
-            agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
-
             let html = '<div class="agendamentos-grid">';
             
             agendamentos.forEach(ag => {
-                const inicio = formatarDataExibicao(ag.inicio);
-                const fim = formatarDataExibicao(ag.fim);
-                const agora = new Date();
-                const dataInicio = new Date(ag.inicio);
-                const dataFim = new Date(ag.fim);
-                
-                let statusText = '🟢 Disponível';
-                
-                if (dataInicio <= agora && dataFim >= agora) {
-                    statusText = '🔴 Em andamento';
-                } else if (dataFim < agora) {
-                    statusText = '⚫ Concluído';
-                }
-                
                 html += `
                     <div class="agendamento-card">
                         <h3>${ag.sala}</h3>
                         <div style="margin-bottom: 15px;">
                             <p><strong>Nome:</strong> ${ag.professor}</p>
-                            <p><strong>Início:</strong> ${inicio}</p>
-                            <p><strong>Término:</strong> ${fim}</p>
-                            <p><strong>Status:</strong> ${statusText}</p>
+                            <p><strong>Início:</strong> ${ag.inicio || 'N/A'}</p>
+                            <p><strong>Término:</strong> ${ag.fim || 'N/A'}</p>
+                            <p><strong>Status:</strong> 🔵 Teste</p>
                         </div>
                     </div>
                 `;
@@ -515,105 +360,54 @@
             container.innerHTML = html;
         }
 
+        // ✅ FUNÇÃO SIMPLIFICADA: Apenas sala e nome
         async function adicionarAgendamento() {
             const sala = document.getElementById('sala').value;
             const nome = document.getElementById('nome').value;
-            const dataHoraInicio = document.getElementById('dataHoraInicio').value;
-            const dataHoraFim = document.getElementById('dataHoraFim').value;
 
             // Limpar erro anterior
             document.getElementById('erroGeral').style.display = 'none';
 
             // Validações básicas
-            if (!sala || !nome || !dataHoraInicio || !dataHoraFim) {
+            if (!sala || !nome) {
                 document.getElementById('erroGeral').textContent = '❌ Por favor, preencha todos os campos!';
                 document.getElementById('erroGeral').style.display = 'block';
                 return;
             }
 
-            // Validar datas
-            const inicio = new Date(dataHoraInicio);
-            const fim = new Date(dataHoraFim);
-            
-            if (fim <= inicio) {
-                document.getElementById('erroGeral').textContent = '❌ A data e hora de término devem ser posteriores à data e hora de início!';
-                document.getElementById('erroGeral').style.display = 'block';
-                return;
-            }
-
-            // ✅ Converter para formato "DD/MM/YYYY HH:mm" CORRETAMENTE
-            const dataInicioFormatada = formatarDataParaBackend(dataHoraInicio);
-            const dataFimFormatada = formatarDataParaBackend(dataHoraFim);
-
-            addDebugInfo('Formatando dados para envio...');
-            addDebugInfo(`Início: ${dataInicioFormatada}`);
-            addDebugInfo(`Fim: ${dataFimFormatada}`);
-
             const novoAgendamento = {
                 sala: sala,
-                professor: nome,
-                inicio: dataInicioFormatada,
-                fim: dataFimFormatada
+                professor: nome
+                // ❌ DATAS REMOVIDAS - serão preenchidas pelo servidor com valores fixos
             };
 
             const statusDiv = document.getElementById('api-status');
             
             try {
-                statusDiv.innerHTML = '💾 Tentando salvar na planilha...';
-                addDebugInfo('Enviando dados para Google Sheets...');
+                statusDiv.innerHTML = '💾 Enviando dados simplificados...';
+                console.log('Enviando:', novoAgendamento);
                 
-                // ✅ Múltiplas tentativas com diferentes abordagens
-                let response;
-                let resultado;
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(novoAgendamento)
+                });
                 
-                // Tentativa 1: POST normal
-                try {
-                    response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(novoAgendamento),
-                        mode: 'cors'
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    resultado = await response.json();
-                    
-                } catch (postError) {
-                    addDebugInfo('❌ POST normal falhou: ' + postError.message);
-                    
-                    // Tentativa 2: POST com timeout mais curto
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000);
-                        
-                        response = await fetch(API_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(novoAgendamento),
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-                        resultado = await response.json();
-                        
-                    } catch (secondError) {
-                        addDebugInfo('❌ Segunda tentativa falhou: ' + secondError.message);
-                        throw new Error('Não foi possível conectar com o servidor. Use a opção manual.');
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
+                const resultado = await response.json();
+                console.log('Resposta:', resultado);
 
                 if (resultado.status === "sucesso") {
-                    statusDiv.innerHTML = '✅ Agendamento salvo na planilha!';
-                    addDebugInfo('✅ Agendamento salvo com sucesso! ID: ' + resultado.id);
+                    statusDiv.innerHTML = '✅ Dados salvos na planilha!';
                     
                     // Mostrar mensagem de sucesso
-                    document.getElementById('erroGeral').textContent = '🎉 SUCESSO! Agendamento salvo no Google Sheets!';
+                    document.getElementById('erroGeral').textContent = '🎉 SUCESSO! Dados salvos no Google Sheets! (TESTE SEM DATAS)';
                     document.getElementById('erroGeral').style.display = 'block';
                     document.getElementById('erroGeral').style.color = '#155724';
                     document.getElementById('erroGeral').style.background = '#d4edda';
@@ -636,81 +430,20 @@
                 
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                addDebugInfo('❌ Erro final ao salvar: ' + error.message);
                 
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
                 
-                // Mensagem de erro amigável com solução
                 document.getElementById('erroGeral').innerHTML = `
                     <div style="text-align: left;">
-                        <h4>❌ Não foi possível salvar automaticamente</h4>
+                        <h4>❌ Não foi possível salvar</h4>
                         <p><strong>Erro:</strong> ${error.message}</p>
-                        
-                        <h4>📝 Solução:</h4>
-                        <p>Adicione manualmente na planilha com os seguintes dados:</p>
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>Sala:</strong> ${sala}<br>
-                            <strong>Nome:</strong> ${nome}<br>
-                            <strong>Início:</strong> ${dataInicioFormatada}<br>
-                            <strong>Fim:</strong> ${dataFimFormatada}
-                        </div>
                         <button class="btn" onclick="window.open('${PLANILHA_URL}', '_blank')" style="margin-top: 10px;">
-                            📊 Abrir Planilha para Adicionar Manualmente
+                            📊 Abrir Planilha Manualmente
                         </button>
                     </div>
                 `;
                 document.getElementById('erroGeral').style.display = 'block';
-            }
-        }
-
-        // ✅ FUNÇÃO CORRIGIDA: Converter data para formato "DD/MM/YYYY HH:mm"
-        function formatarDataParaBackend(dataHoraString) {
-            try {
-                // dataHoraString vem como "YYYY-MM-DDTHH:mm"
-                const data = new Date(dataHoraString);
-                
-                const dia = String(data.getDate()).padStart(2, '0');
-                const mes = String(data.getMonth() + 1).padStart(2, '0');
-                const ano = data.getFullYear();
-                const horas = String(data.getHours()).padStart(2, '0');
-                const minutos = String(data.getMinutes()).padStart(2, '0');
-                
-                // ✅ Formato CORRETO: "DD/MM/YYYY HH:mm" (igual à planilha)
-                const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
-                
-                addDebugInfo(`Data formatada: ${dataFormatada}`);
-                return dataFormatada;
-            } catch (error) {
-                console.error('❌ Erro ao formatar data:', error);
-                addDebugInfo('Erro ao formatar data: ' + error.message);
-                return dataHoraString; // Fallback
-            }
-        }
-
-        // ✅ FUNÇÃO: Formatar data para exibição
-        function formatarDataExibicao(dataString) {
-            try {
-                // Se a data já estiver no formato do backend "DD/MM/YYYY HH:mm"
-                if (dataString.includes('/')) {
-                    const [dataParte, tempoParte] = dataString.split(' ');
-                    const [dia, mes, ano] = dataParte.split('/');
-                    const [hora, minuto] = tempoParte.split(':');
-                    
-                    return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
-                }
-                
-                // Se estiver em outro formato, tenta converter
-                const data = new Date(dataString);
-                return data.toLocaleString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit', 
-                    year: 'numeric',
-                    hour: '2-digit', 
-                    minute: '2-digit'
-                });
-            } catch (e) {
-                return dataString;
             }
         }
     </script>
