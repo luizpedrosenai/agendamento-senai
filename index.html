@@ -3,822 +3,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Agendamento - SENAI</title>
+    <title>Sistema de Cadastro</title>
     <style>
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            padding: 20px; 
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
         }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 20px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-            overflow: hidden; 
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        header { 
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
-            color: white; 
-            padding: 40px 30px; 
-            text-align: center; 
-            position: relative;
-        }
-        .main-content { 
-            padding: 40px; 
-        }
-        .form-section { 
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
-            padding: 35px; 
-            border-radius: 15px; 
-            margin-bottom: 40px; 
-            border-left: 6px solid #3498db;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 25px; 
-            margin-bottom: 30px; 
-        }
-        .form-group { 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .form-group label { 
-            font-weight: 700; 
-            margin-bottom: 12px; 
-            color: #2c3e50; 
-            font-size: 16px;
-        }
-        .form-group input, .form-group select { 
-            padding: 16px 18px; 
-            border: 2px solid #e1e8ed; 
-            border-radius: 12px; 
-            font-size: 16px; 
-            transition: all 0.3s ease; 
-            background: white;
-        }
-        .form-group input:focus, .form-group select:focus { 
-            outline: none; 
-            border-color: #3498db; 
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
-        }
-        .btn { 
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
-            color: white; 
-            border: none; 
-            padding: 18px 40px; 
-            border-radius: 12px; 
-            font-size: 17px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            margin-right: 12px; 
-        }
-        .btn:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 12px 25px rgba(52, 152, 219, 0.4); 
-        }
-        .btn-success { 
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); 
-        }
-        .agendamentos-section { 
-            background: white; 
-            padding: 35px; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        .agendamentos-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-            gap: 25px; 
-            margin-top: 25px;
-        }
-        .agendamento-card { 
-            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%); 
-            border: 1px solid #e1e8ed; 
-            border-radius: 15px; 
-            padding: 25px; 
-            transition: all 0.3s ease; 
-            position: relative;
-        }
-        .agendamento-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
-        }
-        .agendamento-card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-        }
-        .agendamento-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-        .sala-badge {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+        
+        header {
+            background-color: #2c3e50;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 14px;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .status-badge {
-            background: #e8f5e8;
-            color: #27ae60;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
+        
+        header h1 {
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-section {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: 600;
         }
-        .status-badge.em-andamento {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-badge.concluido {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        .agendamento-info {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #555;
-        }
-        .info-item strong {
-            color: #2c3e50;
-            min-width: 80px;
-        }
-        .status {
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: 700;
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 16px;
         }
-        .status-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            color: #155724;
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
         }
-        .status-error {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            color: #721c24;
+        
+        button:hover {
+            background-color: #2980b9;
         }
-        .status-info {
-            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-            color: #0c5460;
+        
+        .btn-danger {
+            background-color: #e74c3c;
         }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-edit {
+            background-color: #f39c12;
+        }
+        
+        .btn-edit:hover {
+            background-color: #d35400;
+        }
+        
         .button-group {
             display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin-top: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
+            margin-top: 20px;
         }
-        .empty-state {
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .no-data {
             text-align: center;
-            padding: 60px 40px;
-            color: #666;
+            padding: 20px;
+            color: #7f8c8d;
         }
-        .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.7;
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
         }
-        .loading {
-            text-align: center;
-            padding: 60px 40px;
-            color: #666;
+        
+        .notification.success {
+            background-color: #2ecc71;
         }
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 25px;
+        
+        .notification.error {
+            background-color: #e74c3c;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .notification.show {
+            opacity: 1;
         }
+        
         @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .agendamentos-grid {
-                grid-template-columns: 1fr;
-            }
-            .button-group {
+            .app-container {
                 flex-direction: column;
             }
-            .btn {
-                margin-right: 0;
-                margin-bottom: 10px;
-                justify-content: center;
+            
+            .form-section, .data-section {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="container">
+            <h1>Sistema de Cadastro</h1>
+        </div>
+    </header>
+    
     <div class="container">
-        <header>
-            <h1 style="font-size: 2.5em; margin-bottom: 10px;">🎓 Sistema de Agendamento SENAI</h1>
-            <p style="font-size: 1.2em; opacity: 0.9;">Sistema com Dados Compartilhados 🔥</p>
-        </header>
-
-        <div class="main-content">
-            <div id="status" class="status status-info">
-                <span>🚀</span> Sistema carregado - Dados compartilhados entre usuários
-            </div>
-
+        <div class="app-container">
             <section class="form-section">
-                <h2 style="font-size: 1.8em; margin-bottom: 25px; color: #2c3e50;">
-                    ➕ Novo Agendamento
-                </h2>
-                
-                <div class="form-grid">
+                <h2>Cadastrar Novo Item</h2>
+                <form id="cadastroForm">
                     <div class="form-group">
-                        <label for="sala">Sala</label>
-                        <select id="sala" required>
-                            <option value="">Selecione uma sala...</option>
-                            <option value="Sala 1">🏫 Sala 1</option>
-                            <option value="Sala 2">🏫 Sala 2</option>
-                            <option value="Sala 3">🏫 Sala 3</option>
-                            <option value="Laboratório 1">🔬 Laboratório 1</option>
-                            <option value="Laboratório 2">🔬 Laboratório 2</option>
-                            <option value="Auditório">🎤 Auditório</option>
-                            <option value="Sala de Reuniões">💼 Sala de Reuniões</option>
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">E-mail:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="telefone">Telefone:</label>
+                        <input type="tel" id="telefone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categoria">Categoria:</label>
+                        <select id="categoria">
+                            <option value="Pessoal">Pessoal</option>
+                            <option value="Trabalho">Trabalho</option>
+                            <option value="Estudos">Estudos</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="professor">Professor/Responsável</label>
-                        <input type="text" id="professor" placeholder="Digite o nome completo" required>
+                    <div class="button-group">
+                        <button type="submit" id="btnSalvar">Salvar</button>
+                        <button type="button" id="btnCancelar" class="btn-danger">Cancelar</button>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="dataInicio">Data e Hora de Início</label>
-                        <input type="datetime-local" id="dataInicio" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="dataFim">Data e Hora de Término</label>
-                        <input type="datetime-local" id="dataFim" required>
-                    </div>
-                </div>
-                
-                <div id="erroGeral" class="status status-error" style="display: none;"></div>
-                
-                <div class="button-group">
-                    <button class="btn btn-success" onclick="criarAgendamento()">
-                        💾 Salvar Agendamento
-                    </button>
-                    <button class="btn" onclick="limparFormulario()">
-                        🗑️ Limpar Campos
-                    </button>
-                    <button class="btn" onclick="carregarAgendamentos()">
-                        🔄 Atualizar Lista
-                    </button>
-                    <button class="btn" onclick="sincronizarDados()">
-                        🔗 Sincronizar com Servidor
-                    </button>
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
-                    <h4>🌐 Como Funciona</h4>
-                    <p><strong>Armazenamento Local:</strong> Dados salvos no navegador</p>
-                    <p><strong>Compartilhamento:</strong> Use "Sincronizar com Servidor" para compartilhar entre dispositivos</p>
-                    <p><strong>Backup:</strong> Os dados ficam salvos mesmo após fechar o navegador</p>
-                </div>
+                </form>
             </section>
-
-            <section class="agendamentos-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <h2 style="font-size: 1.8em; color: #2c3e50;">
-                        📋 Agendamentos
-                    </h2>
-                    <span id="contador" style="color: #666; font-weight: 700; font-size: 1.1em; background: #f8f9fa; padding: 8px 16px; border-radius: 20px;">
-                        0 agendamentos
-                    </span>
-                </div>
-                
-                <div id="agendamentos-container">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3 style="margin-bottom: 15px; color: #555;">Nenhum agendamento encontrado</h3>
-                        <p style="color: #777;">Crie o primeiro agendamento usando o formulário acima</p>
+            
+            <section class="data-section">
+                <h2>Itens Cadastrados</h2>
+                <div id="tabelaContainer">
+                    <table id="tabelaDados">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Telefone</th>
+                                <th>Categoria</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCorpo">
+                            <!-- Os dados serão inseridos aqui via JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="semDados" class="no-data">
+                        Nenhum item cadastrado ainda.
                     </div>
                 </div>
             </section>
         </div>
     </div>
+    
+    <div id="notification" class="notification"></div>
 
     <script>
-        // 🔥 SISTEMA 100% FUNCIONAL - Sem Firebase, sem configuração
-        class SistemaAgendamentoReal {
-            constructor() {
-                this.chaveStorage = 'agendamentos_senai_compartilhados';
-                this.chaveSincronizacao = 'ultima_sincronizacao';
-                this.agendamentos = this.carregarDoStorage();
-                this.iniciarSincronizacaoAutomatica();
-            }
-
-            // 💾 Salvar no localStorage
-            salvarNoStorage() {
-                try {
-                    const dadosCompletos = {
-                        agendamentos: this.agendamentos,
-                        ultimaAtualizacao: new Date().toISOString(),
-                        versao: '1.0'
+        // Elementos do DOM
+        const cadastroForm = document.getElementById('cadastroForm');
+        const tabelaCorpo = document.getElementById('tabelaCorpo');
+        const semDados = document.getElementById('semDados');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const notification = document.getElementById('notification');
+        
+        // Estado da aplicação
+        let editandoId = null;
+        let dados = JSON.parse(localStorage.getItem('dadosCadastro')) || [];
+        
+        // Inicializar a aplicação
+        function inicializar() {
+            atualizarTabela();
+            configurarEventos();
+        }
+        
+        // Configurar eventos
+        function configurarEventos() {
+            cadastroForm.addEventListener('submit', salvarDados);
+            btnCancelar.addEventListener('click', cancelarEdicao);
+        }
+        
+        // Salvar dados (novo ou edição)
+        function salvarDados(event) {
+            event.preventDefault();
+            
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const telefone = document.getElementById('telefone').value;
+            const categoria = document.getElementById('categoria').value;
+            
+            if (editandoId !== null) {
+                // Editar item existente
+                const index = dados.findIndex(item => item.id === editandoId);
+                if (index !== -1) {
+                    dados[index] = {
+                        id: editandoId,
+                        nome,
+                        email,
+                        telefone,
+                        categoria
                     };
-                    localStorage.setItem(this.chaveStorage, JSON.stringify(dadosCompletos));
-                    
-                    // Disparar evento para sincronização entre abas
-                    window.dispatchEvent(new StorageEvent('storage', {
-                        key: this.chaveStorage,
-                        newValue: JSON.stringify(dadosCompletos)
-                    }));
-                    
-                    return true;
-                } catch (e) {
-                    console.error('Erro ao salvar:', e);
-                    return false;
+                    mostrarNotificacao('Item atualizado com sucesso!', 'success');
                 }
-            }
-
-            // 📥 Carregar do localStorage
-            carregarDoStorage() {
-                try {
-                    const dados = localStorage.getItem(this.chaveStorage);
-                    if (dados) {
-                        const parsed = JSON.parse(dados);
-                        return parsed.agendamentos || [];
-                    }
-                    return [];
-                } catch (e) {
-                    console.error('Erro ao carregar:', e);
-                    return [];
-                }
-            }
-
-            // 🔄 Sincronização automática entre abas
-            iniciarSincronizacaoAutomatica() {
-                // Sincronizar quando dados mudarem em outras abas
-                window.addEventListener('storage', (e) => {
-                    if (e.key === this.chaveStorage && e.newValue) {
-                        try {
-                            const novosDados = JSON.parse(e.newValue);
-                            this.agendamentos = novosDados.agendamentos || [];
-                            if (typeof window.atualizarInterface === 'function') {
-                                window.atualizarInterface();
-                            }
-                        } catch (error) {
-                            console.error('Erro na sincronização:', error);
-                        }
-                    }
-                });
-
-                // Sincronizar a cada 10 segundos (para detectar mudanças)
-                setInterval(() => {
-                    const dadosAtuais = this.carregarDoStorage();
-                    if (JSON.stringify(dadosAtuais) !== JSON.stringify(this.agendamentos)) {
-                        this.agendamentos = dadosAtuais;
-                        if (typeof window.atualizarInterface === 'function') {
-                            window.atualizarInterface();
-                        }
-                    }
-                }, 10000);
-            }
-
-            // 🆔 Gerar ID único
-            gerarId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-            }
-
-            // ➕ Adicionar agendamento
-            adicionarAgendamento(dados) {
-                const novoAgendamento = {
-                    id: this.gerarId(),
-                    sala: dados.sala,
-                    professor: dados.professor,
-                    inicio: dados.inicio,
-                    fim: dados.fim,
-                    dataCriacao: new Date().toISOString(),
-                    criadoPor: this.obterIdentificadorUsuario(),
-                    dispositivo: this.obterIdentificadorDispositivo()
+                editandoId = null;
+                document.getElementById('btnSalvar').textContent = 'Salvar';
+            } else {
+                // Adicionar novo item
+                const novoItem = {
+                    id: Date.now(), // ID único baseado no timestamp
+                    nome,
+                    email,
+                    telefone,
+                    categoria
                 };
-
-                this.agendamentos.push(novoAgendamento);
-                const sucesso = this.salvarNoStorage();
+                dados.push(novoItem);
+                mostrarNotificacao('Item cadastrado com sucesso!', 'success');
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('dadosCadastro', JSON.stringify(dados));
+            
+            // Atualizar a tabela e limpar o formulário
+            atualizarTabela();
+            cadastroForm.reset();
+        }
+        
+        // Editar item
+        function editarItem(id) {
+            const item = dados.find(item => item.id === id);
+            if (item) {
+                document.getElementById('nome').value = item.nome;
+                document.getElementById('email').value = item.email;
+                document.getElementById('telefone').value = item.telefone;
+                document.getElementById('categoria').value = item.categoria;
                 
-                return {
-                    sucesso: sucesso,
-                    agendamento: novoAgendamento,
-                    mensagem: sucesso ? '✅ Agendamento salvo com sucesso!' : '❌ Erro ao salvar agendamento'
-                };
+                editandoId = id;
+                document.getElementById('btnSalvar').textContent = 'Atualizar';
+                
+                // Rolar para o formulário
+                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
             }
-
-            // 👤 Obter identificador do usuário
-            obterIdentificadorUsuario() {
-                let usuarioId = localStorage.getItem('usuario_senai_id');
-                if (!usuarioId) {
-                    usuarioId = 'usr_' + Math.random().toString(36).substr(2, 6);
-                    localStorage.setItem('usuario_senai_id', usuarioId);
-                }
-                return usuarioId;
-            }
-
-            // 📱 Obter identificador do dispositivo
-            obterIdentificadorDispositivo() {
-                let dispositivoId = localStorage.getItem('dispositivo_senai_id');
-                if (!dispositivoId) {
-                    dispositivoId = 'dev_' + Math.random().toString(36).substr(2, 6);
-                    localStorage.setItem('dispositivo_senai_id', dispositivoId);
-                }
-                return dispositivoId;
-            }
-
-            // 📋 Obter todos os agendamentos
-            obterAgendamentos() {
-                return this.agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
-            }
-
-            // 🗑️ Remover agendamento
-            removerAgendamento(id) {
-                this.agendamentos = this.agendamentos.filter(ag => ag.id !== id);
-                const sucesso = this.salvarNoStorage();
-                return sucesso;
-            }
-
-            // 🔗 Sincronizar com "servidor" (localStorage compartilhado)
-            sincronizarDados() {
-                // Recarregar do storage para pegar dados mais recentes
-                this.agendamentos = this.carregarDoStorage();
-                this.salvarNoStorage(); // Forçar atualização
-                return {
-                    sucesso: true,
-                    mensagem: '✅ Dados sincronizados!',
-                    total: this.agendamentos.length
-                };
-            }
-
-            // 📤 Exportar dados para backup
-            exportarDados() {
-                return JSON.stringify({
-                    agendamentos: this.agendamentos,
-                    metadata: {
-                        exportadoEm: new Date().toISOString(),
-                        total: this.agendamentos.length,
-                        versao: '1.0'
-                    }
-                }, null, 2);
-            }
-
-            // 📥 Importar dados de backup
-            importarDados(dadosJSON) {
-                try {
-                    const dados = JSON.parse(dadosJSON);
-                    if (dados.agendamentos && Array.isArray(dados.agendamentos)) {
-                        // Mesclar dados, evitando duplicatas
-                        const idsExistentes = new Set(this.agendamentos.map(ag => ag.id));
-                        const novosAgendamentos = dados.agendamentos.filter(ag => !idsExistentes.has(ag.id));
-                        
-                        this.agendamentos.push(...novosAgendamentos);
-                        const sucesso = this.salvarNoStorage();
-                        
-                        return {
-                            sucesso: sucesso,
-                            adicionados: novosAgendamentos.length,
-                            mensagem: sucesso ? `✅ ${novosAgendamentos.length} agendamentos importados` : '❌ Erro ao importar'
-                        };
-                    }
-                    throw new Error('Formato inválido');
-                } catch (error) {
-                    return {
-                        sucesso: false,
-                        mensagem: '❌ Erro ao importar: ' + error.message
-                    };
+        }
+        
+        // Excluir item
+        function excluirItem(id) {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                dados = dados.filter(item => item.id !== id);
+                localStorage.setItem('dadosCadastro', JSON.stringify(dados));
+                atualizarTabela();
+                mostrarNotificacao('Item excluído com sucesso!', 'success');
+                
+                // Se estava editando o item excluído, cancelar a edição
+                if (editandoId === id) {
+                    cancelarEdicao();
                 }
             }
         }
-
-        // Instanciar o sistema
-        const sistema = new SistemaAgendamentoReal();
-
-        // Inicialização da página
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema de Agendamento iniciado');
-            configurarDatasIniciais();
-            carregarAgendamentos();
-            
-            // Mostrar informações do sistema
-            setTimeout(() => {
-                document.getElementById('status').innerHTML = 
-                    '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos encontrados';
-            }, 1000);
-        });
-
-        // Configurar datas iniciais
-        function configurarDatasIniciais() {
-            const agora = new Date();
-            const inicio = new Date(agora.getTime() + 60 * 60 * 1000);
-            const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
-            
-            document.getElementById('dataInicio').value = formatarParaDateTimeLocal(inicio);
-            document.getElementById('dataFim').value = formatarParaDateTimeLocal(fim);
-            
-            document.getElementById('dataInicio').addEventListener('change', validarDatas);
-            document.getElementById('dataFim').addEventListener('change', validarDatas);
+        
+        // Cancelar edição
+        function cancelarEdicao() {
+            editandoId = null;
+            document.getElementById('btnSalvar').textContent = 'Salvar';
+            cadastroForm.reset();
         }
-
-        // Formatar data para input datetime-local
-        function formatarParaDateTimeLocal(data) {
-            const ano = data.getFullYear();
-            const mes = String(data.getMonth() + 1).padStart(2, '0');
-            const dia = String(data.getDate()).padStart(2, '0');
-            const horas = String(data.getHours()).padStart(2, '0');
-            const minutos = String(data.getMinutes()).padStart(2, '0');
+        
+        // Atualizar a tabela com os dados
+        function atualizarTabela() {
+            tabelaCorpo.innerHTML = '';
             
-            return `${ano}-${mes}-${dia}T${horas}:${minutos}`;
-        }
-
-        // Validar datas
-        function validarDatas() {
-            const dataInicio = document.getElementById('dataInicio').value;
-            const dataFim = document.getElementById('dataFim').value;
-            const erroGeral = document.getElementById('erroGeral');
-            
-            if (!dataInicio || !dataFim) return true;
-            
-            const inicio = new Date(dataInicio);
-            const fim = new Date(dataFim);
-            
-            if (fim <= inicio) {
-                erroGeral.innerHTML = '❌ A data e hora de término devem ser posteriores à data e hora de início!';
-                erroGeral.style.display = 'block';
-                return false;
-            }
-            
-            erroGeral.style.display = 'none';
-            return true;
-        }
-
-        // Criar novo agendamento
-        function criarAgendamento() {
-            const sala = document.getElementById('sala').value;
-            const professor = document.getElementById('professor').value;
-            const dataInicio = document.getElementById('dataInicio').value;
-            const dataFim = document.getElementById('dataFim').value;
-            const statusDiv = document.getElementById('status');
-            const erroGeral = document.getElementById('erroGeral');
-
-            // Limpar erros anteriores
-            erroGeral.style.display = 'none';
-
-            // Validações básicas
-            if (!sala || !professor || !dataInicio || !dataFim) {
-                erroGeral.innerHTML = '❌ Por favor, preencha todos os campos!';
-                erroGeral.style.display = 'block';
+            if (dados.length === 0) {
+                semDados.style.display = 'block';
                 return;
             }
-
-            // Validar datas
-            if (!validarDatas()) {
-                return;
-            }
-
-            // Criar agendamento no sistema
-            const resultado = sistema.adicionarAgendamento({
-                sala: sala,
-                professor: professor,
-                inicio: dataInicio,
-                fim: dataFim
-            });
-
-            // Feedback visual
-            statusDiv.innerHTML = resultado.mensagem;
-            statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
-
-            if (resultado.sucesso) {
-                // Limpar formulário
-                limparFormulario();
+            
+            semDados.style.display = 'none';
+            
+            dados.forEach(item => {
+                const linha = document.createElement('tr');
                 
-                // Recarregar lista após 2 segundos
-                setTimeout(() => {
-                    carregarAgendamentos();
-                    statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
-                    statusDiv.className = 'status status-info';
-                }, 2000);
-            }
-        }
-
-        // Limpar formulário
-        function limparFormulario() {
-            document.getElementById('sala').value = '';
-            document.getElementById('professor').value = '';
-            configurarDatasIniciais();
-            document.getElementById('erroGeral').style.display = 'none';
-        }
-
-        // Carregar e exibir agendamentos
-        function carregarAgendamentos() {
-            const container = document.getElementById('agendamentos-container');
-            const contador = document.getElementById('contador');
-            const agendamentos = sistema.obterAgendamentos();
-
-            if (!agendamentos || agendamentos.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3 style="margin-bottom: 15px; color: #555;">Nenhum agendamento encontrado</h3>
-                        <p style="color: #777;">Crie o primeiro agendamento usando o formulário acima</p>
-                    </div>
+                linha.innerHTML = `
+                    <td>${item.nome}</td>
+                    <td>${item.email}</td>
+                    <td>${item.telefone || '-'}</td>
+                    <td>${item.categoria}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editarItem(${item.id})">Editar</button>
+                        <button class="btn-danger" onclick="excluirItem(${item.id})">Excluir</button>
+                    </td>
                 `;
-                contador.textContent = '0 agendamentos';
-                return;
-            }
-
-            let html = '<div class="agendamentos-grid">';
-            
-            agendamentos.forEach(ag => {
-                const inicio = formatarDataExibicao(ag.inicio);
-                const fim = formatarDataExibicao(ag.fim);
-                const agora = new Date();
-                const dataInicio = new Date(ag.inicio);
-                const dataFim = new Date(ag.fim);
                 
-                let statusText = '🟢 Disponível';
-                let statusClass = '';
-                
-                if (dataInicio <= agora && dataFim >= agora) {
-                    statusText = '🔴 Em andamento';
-                    statusClass = 'em-andamento';
-                } else if (dataFim < agora) {
-                    statusText = '⚫ Concluído';
-                    statusClass = 'concluido';
-                }
-                
-                html += `
-                    <div class="agendamento-card">
-                        <div class="agendamento-header">
-                            <div class="sala-badge">${ag.sala}</div>
-                            <div class="status-badge ${statusClass}">${statusText}</div>
-                        </div>
-                        <div class="agendamento-info">
-                            <div class="info-item">
-                                <strong>👨‍🏫 Professor:</strong>
-                                <span>${ag.professor}</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>⏰ Início:</strong>
-                                <span>${inicio}</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>⏱️ Término:</strong>
-                                <span>${fim}</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>📅 Duração:</strong>
-                                <span>${calcularDuracao(ag.inicio, ag.fim)}</span>
-                            </div>
-                            <div class="info-item">
-                                <strong>📱 Criado em:</strong>
-                                <span>${ag.dispositivo || 'Este dispositivo'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                tabelaCorpo.appendChild(linha);
             });
-            
-            html += '</div>';
-            container.innerHTML = html;
-            contador.textContent = `${agendamentos.length} agendamento${agendamentos.length !== 1 ? 's' : ''}`;
         }
-
-        // Sincronizar dados
-        function sincronizarDados() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '🔄 Sincronizando dados...';
-            
-            const resultado = sistema.sincronizarDados();
-            
-            statusDiv.innerHTML = resultado.mensagem + ' - ' + resultado.total + ' agendamentos';
-            statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
-            
-            carregarAgendamentos();
+        
+        // Mostrar notificação
+        function mostrarNotificacao(mensagem, tipo) {
+            notification.textContent = mensagem;
+            notification.className = `notification ${tipo} show`;
             
             setTimeout(() => {
-                statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
-                statusDiv.className = 'status status-info';
+                notification.classList.remove('show');
             }, 3000);
         }
-
-        // Formatar data para exibição
-        function formatarDataExibicao(dataString) {
-            const data = new Date(dataString);
-            return data.toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Calcular duração entre duas datas
-        function calcularDuracao(inicio, fim) {
-            const diff = new Date(fim) - new Date(inicio);
-            const horas = Math.floor(diff / (1000 * 60 * 60));
-            const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
-            if (horas === 0) {
-                return `${minutos} min`;
-            } else if (minutos === 0) {
-                return `${horas} h`;
-            } else {
-                return `${horas}h ${minutos}min`;
-            }
-        }
-
-        // Função global para atualização da interface
-        window.atualizarInterface = carregarAgendamentos;
-
-        // Adicionar funcionalidade de exportação/importação
+        
+        // Exportar dados
         function exportarDados() {
-            const dados = sistema.exportarDados();
-            const blob = new Blob([dados], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `agendamentos_senai_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const dataStr = JSON.stringify(dados, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'dados_cadastro.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
         }
-
-        function importarDados() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const resultado = sistema.importarDados(e.target.result);
-                        const statusDiv = document.getElementById('status');
-                        
-                        statusDiv.innerHTML = resultado.mensagem;
-                        statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
-                        
-                        carregarAgendamentos();
-                        
-                        setTimeout(() => {
-                            statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
-                            statusDiv.className = 'status status-info';
-                        }, 3000);
-                    };
-                    reader.readAsText(file);
+        
+        // Importar dados
+        function importarDados(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(event) {
+                try {
+                    const dadosImportados = JSON.parse(event.target.result);
+                    if (Array.isArray(dadosImportados)) {
+                        dados = dadosImportados;
+                        localStorage.setItem('dadosCadastro', JSON.stringify(dados));
+                        atualizarTabela();
+                        mostrarNotificacao('Dados importados com sucesso!', 'success');
+                    } else {
+                        mostrarNotificacao('Formato de arquivo inválido!', 'error');
+                    }
+                } catch (e) {
+                    mostrarNotificacao('Erro ao importar dados!', 'error');
                 }
             };
-            input.click();
+            fileReader.readAsText(event.target.files[0]);
         }
-
+        
+        // Inicializar a aplicação quando a página carregar
+        document.addEventListener('DOMContentLoaded', inicializar);
+        
         // Adicionar botões de exportação/importação
         document.addEventListener('DOMContentLoaded', function() {
-            const buttonGroup = document.querySelector('.button-group');
+            const dataSection = document.querySelector('.data-section');
+            const header = dataSection.querySelector('h2');
             
-            const exportBtn = document.createElement('button');
-            exportBtn.className = 'btn';
-            exportBtn.innerHTML = '📤 Exportar';
-            exportBtn.onclick = exportarDados;
-            buttonGroup.appendChild(exportBtn);
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'button-group';
+            buttonGroup.innerHTML = `
+                <button onclick="exportarDados()">Exportar Dados</button>
+                <label for="importFile" style="display: inline-block;">
+                    <button type="button">Importar Dados</button>
+                </label>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importarDados(event)">
+            `;
             
-            const importBtn = document.createElement('button');
-            importBtn.className = 'btn';
-            importBtn.innerHTML = '📥 Importar';
-            importBtn.onclick = importarDados;
-            buttonGroup.appendChild(importBtn);
+            header.parentNode.insertBefore(buttonGroup, header.nextSibling);
         });
     </script>
 </body>
