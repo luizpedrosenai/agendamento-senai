@@ -298,6 +298,17 @@
                         <input type="text" id="professor" placeholder="Nome do professor">
                     </div>
                     <div class="form-group">
+                        <label for="diaSemana">Dia da Semana:</label>
+                        <select id="diaSemana">
+                            <option value="">Selecione o dia</option>
+                            <option value="Segunda-feira">Segunda-feira</option>
+                            <option value="Terça-feira">Terça-feira</option>
+                            <option value="Quarta-feira">Quarta-feira</option>
+                            <option value="Quinta-feira">Quinta-feira</option>
+                            <option value="Sexta-feira">Sexta-feira</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="inicio">Data e Hora de Início:</label>
                         <input type="datetime-local" id="inicio">
                     </div>
@@ -410,6 +421,7 @@
                         <h3>${ag.sala}</h3>
                         <div class="agendamento-info">
                             <p><strong>Professor:</strong> ${ag.professor}</p>
+                            <p><strong>Dia:</strong> ${ag.diaSemana || 'Não informado'}</p>
                             <p><strong>Início:</strong> ${inicio}</p>
                             <p><strong>Término:</strong> ${fim}</p>
                             <p><strong>Status:</strong> ${status === 'disponivel' ? '🟢 Disponível' : '🔴 Em andamento'}</p>
@@ -430,11 +442,12 @@
         async function adicionarAgendamento() {
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
+            const diaSemana = document.getElementById('diaSemana').value;
             const inicio = document.getElementById('inicio').value;
             const fim = document.getElementById('fim').value;
 
             // Validações
-            if (!sala || !professor || !inicio || !fim) {
+            if (!sala || !professor || !diaSemana || !inicio || !fim) {
                 alert('❌ Por favor, preencha todos os campos!');
                 return;
             }
@@ -477,6 +490,7 @@
                     id: Date.now(),
                     sala: sala,
                     professor: professor,
+                    diaSemana: diaSemana,
                     inicio: inicio,
                     fim: fim
                 };
@@ -495,6 +509,7 @@
                 // Limpar formulário
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
+                document.getElementById('diaSemana').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
 
@@ -511,6 +526,7 @@
                     id: Date.now(),
                     sala: sala,
                     professor: professor,
+                    diaSemana: diaSemana,
                     inicio: inicio,
                     fim: fim
                 });
@@ -519,6 +535,7 @@
                 // Limpar e recarregar
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
+                document.getElementById('diaSemana').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
                 mostrarAgendamentos(agendamentos);
