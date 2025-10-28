@@ -310,23 +310,23 @@
                 return;
             }
 
-            // Combinar data e hora
-            const inicioISO = `${data}T${horaInicio}`;
-            const fimISO = `${data}T${horaFim}`;
+            // ✅ CORREÇÃO: Converter para formato "DD/MM/YYYY HH:mm"
+            const dataInicioFormatada = formatarDataParaBackend(data, horaInicio);
+            const dataFimFormatada = formatarDataParaBackend(data, horaFim);
 
             const novoAgendamento = {
                 sala: sala,
                 professor: professor,
-                inicio: inicioISO,
-                fim: fimISO
+                inicio: dataInicioFormatada, // Agora no formato correto: "28/10/2025 14:30"
+                fim: dataFimFormatada       // Agora no formato correto: "28/10/2025 16:30"
             };
 
             const statusDiv = document.getElementById('api-status');
             
             try {
                 statusDiv.innerHTML = '💾 Salvando na planilha Google...';
-
                 console.log('💾 Enviando para Google Sheets:', novoAgendamento);
+                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -339,8 +339,7 @@
                     statusDiv.innerHTML = '✅ Agendamento salvo na planilha!';
                     alert('🎉 SUCESSO! Agendamento salvo no Google Sheets!\n\nID: ' + resultado.id);
                     
-                    // Limpar formulário
-                    document.getElementById('sala').value = '';
+                    // Limpar formulário (apenas alguns campos)
                     document.getElementById('professor').value = '';
                     
                     // Recarregar lista após 2 segundos
@@ -357,6 +356,21 @@
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
                 alert('❌ Erro ao salvar: ' + error.message);
+            }
+        }
+
+        // ✅ NOVA FUNÇÃO: Converter data para formato "DD/MM/YYYY HH:mm"
+        function formatarDataParaBackend(dataString, horaString) {
+            try {
+                // dataString vem como "YYYY-MM-DD", horaString como "HH:mm"
+                const [ano, mes, dia] = dataString.split('-');
+                const [horas, minutos] = horaString.split(':');
+                
+                // Formato: "DD/MM/YYYY HH:mm"
+                return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            } catch (error) {
+                console.error('Erro ao formatar data:', error);
+                return dataString + ' ' + horaString; // Fallback
             }
         }
 
