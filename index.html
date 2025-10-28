@@ -473,16 +473,20 @@
                 const data = await response.json();
                 const agendamentos = data.record.agendamentos || [];
 
-                // Verificar conflitos
+                // Verificar conflitos - AGORA CONSIDERANDO O DIA DA SEMANA
                 const conflito = agendamentos.some(ag => {
-                    return ag.sala === sala &&
-                        ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
-                            (new Date(fim) > new Date(ag.inicio) && new Date(fim) <= new Date(ag.fim)) ||
-                            (new Date(inicio) <= new Date(ag.inicio) && new Date(fim) >= new Date(ag.fim)));
+                    // Só há conflito se for na MESMA SALA e NO MESMO DIA DA SEMANA
+                    if (ag.sala === sala && ag.diaSemana === diaSemana) {
+                        // E se houver sobreposição de horários
+                        return ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
+                               (new Date(fim) > new Date(ag.inicio) && new Date(fim) <= new Date(ag.fim)) ||
+                               (new Date(inicio) <= new Date(ag.inicio) && new Date(fim) >= new Date(ag.fim)));
+                    }
+                    return false; // Não há conflito se for em dias diferentes
                 });
 
                 if (conflito) {
-                    alert('❌ Já existe um agendamento para esta sala no horário selecionado!');
+                    alert('❌ Já existe um agendamento para esta sala no mesmo dia e horário selecionado!');
                     return;
                 }
 
