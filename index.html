@@ -97,7 +97,7 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        /* NOVO ESTILO PARA DROPDOWN DE DIAS */
+        /* ESTILO PARA DROPDOWN DE DIAS */
         .dropdown-dias {
             position: relative;
         }
@@ -300,11 +300,42 @@
             border-radius: 8px;
             border-left: 4px solid;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .agendamento-item:hover {
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* NOVO ESTILO PARA O TÍTULO DO CARTÃO */
+        .agendamento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .agendamento-titulo {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .sala-nome {
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .periodo-badge {
+            background: rgba(255,255,255,0.9);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .agendamento-info p {
@@ -474,6 +505,12 @@
 
             .main-content {
                 padding: 20px;
+            }
+
+            .agendamento-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
     </style>
@@ -885,10 +922,16 @@
 
                         html += `
                             <div class="agendamento-item">
+                                <div class="status-indicator ${status === 'ocupado' ? 'status-ocupado' : 'status-disponivel'}"></div>
+                                <div class="agendamento-header">
+                                    <div class="agendamento-titulo">
+                                        <span class="sala-nome">${ag.sala.toUpperCase()}</span>
+                                    </div>
+                                    <div class="periodo-badge">${ag.periodo}</div>
+                                </div>
                                 <div class="agendamento-info">
                                     <p><strong>Professor:</strong> ${ag.professor}</p>
                                     <p><strong>Dia:</strong> ${ag.diaSemana}</p>
-                                    <p><strong>Período:</strong> ${ag.periodo}</p>
                                     <p><strong>Início:</strong> ${inicio}</p>
                                     <p><strong>Término:</strong> ${fim}</p>
                                     <p>
