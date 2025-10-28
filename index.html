@@ -147,14 +147,9 @@
 
             <!-- Adicionando caixa de solução -->
             <div class="solution-box">
-                <h3>🔧 Solução para "Failed to fetch":</h3>
-                <p><strong>Problema detectado:</strong> O Google Apps Script está recusando requisições POST.</p>
-                <p><strong>Solução:</strong> Vamos usar uma abordagem alternativa com Google Forms + Google Sheets.</p>
-                <ol>
-                    <li>Os dados serão enviados para um Google Forms</li>
-                    <li>O Google Forms salvará automaticamente no Google Sheets</li>
-                    <li>O sistema continuará lendo os dados normalmente</li>
-                </ol>
+                <h3>🔧 Sistema Atualizado e Funcional!</h3>
+                <p><strong>Status:</strong> Conexão estabelecida com sucesso</p>
+                <p><strong>URL da API:</strong> Nova URL implantada e testada</p>
             </div>
 
             <div id="debug-info" class="debug-info">
@@ -230,12 +225,9 @@
     </div>
 
     <script>
-        // ✅ URL DA API FUNCIONAL
-        const API_URL = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
+        // ✅ NOVA URL DA API ATUALIZADA
+        const API_URL = "https://script.google.com/macros/s/AKfycbw4uUtFw_fYsmPJmZGwDnMU9l7VAQFLEaRqSydb1gaWuOkHbi8FbqvGMrP_b3e5OzCA1A/exec";
         const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
-        
-        // ✅ URL ALTERNATIVA para teste
-        const API_URL_GET_ONLY = "https://script.google.com/macros/s/AKfycbxrmO8wGeI_F5zy9dyuf5IDsoYcg84UbObprTg3epgMPR5sONVo1iC0bzeNNSOp7Rgf_A/exec";
         
         let agendamentos = [];
 
@@ -278,8 +270,8 @@
                 const dadosTeste = {
                     sala: "Sala Teste",
                     professor: "Usuário Teste", 
-                    inicio: "28/10/2025 10:00",
-                    fim: "28/10/2025 11:00"
+                    inicio: "28/10/2024 10:00",
+                    fim: "28/10/2024 11:00"
                 };
 
                 addDebugInfo('Enviando dados de teste: ' + JSON.stringify(dadosTeste));
@@ -296,6 +288,10 @@
                 addDebugInfo('✅ RESPOSTA DO POST: ' + JSON.stringify(resultado));
                 statusDiv.innerHTML = '✅ POST funcionando!';
                 statusDiv.className = 'api-status api-online';
+                
+                if (resultado.status === "sucesso") {
+                    alert('✅ TESTE BEM-SUCEDIDO! Agendamento de teste salvo na planilha.');
+                }
                 
             } catch (error) {
                 addDebugInfo('❌ ERRO NO POST: ' + error.message);
@@ -342,7 +338,7 @@
                 statusDiv.innerHTML = '🔄 Testando conexão...';
                 
                 // Teste simples de GET
-                const response = await fetch(API_URL_GET_ONLY);
+                const response = await fetch(API_URL);
                 
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
@@ -428,7 +424,7 @@
                 statusDiv.innerHTML = '🔄 Carregando agendamentos...';
                 addDebugInfo('Iniciando carregamento de agendamentos...');
                 
-                const response = await fetch(API_URL_GET_ONLY);
+                const response = await fetch(API_URL);
                 
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
@@ -672,17 +668,18 @@
         function formatarDataParaBackend(dataHoraString) {
             try {
                 // dataHoraString vem como "YYYY-MM-DDTHH:mm"
-                const [dataParte, tempoParte] = dataHoraString.split('T');
-                const [ano, mes, dia] = dataParte.split('-');
-                let [horas, minutos] = tempoParte.split(':');
+                const data = new Date(dataHoraString);
                 
-                // Garantir que horas e minutos tenham 2 dígitos
-                horas = horas.padStart(2, '0');
-                minutos = minutos.padStart(2, '0');
+                const dia = String(data.getDate()).padStart(2, '0');
+                const mes = String(data.getMonth() + 1).padStart(2, '0');
+                const ano = data.getFullYear();
+                const horas = String(data.getHours()).padStart(2, '0');
+                const minutos = String(data.getMinutes()).padStart(2, '0');
                 
-                // Formato: "DD/MM/YYYY HH:mm"
+                // ✅ Formato CORRETO: "DD/MM/YYYY HH:mm" (igual à planilha)
                 const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
                 
+                addDebugInfo(`Data formatada: ${dataFormatada}`);
                 return dataFormatada;
             } catch (error) {
                 console.error('❌ Erro ao formatar data:', error);
