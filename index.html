@@ -39,6 +39,11 @@
             outline: none; border-color: #3498db; 
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); 
         }
+        .datetime-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
         .btn { 
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
             color: white; border: none; padding: 15px 30px; border-radius: 8px; 
@@ -84,10 +89,19 @@
         .api-online { 
             background: #d4edda; color: #155724; border: 1px solid #c3e6cb; 
         }
+        .api-offline { 
+            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; 
+        }
         .success-banner {
             background: #d4edda; color: #155724; padding: 15px;
             border-radius: 5px; margin: 10px 0; text-align: center;
             border: 1px solid #c3e6cb; font-weight: 600;
+        }
+        .section-title {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e8ed;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -125,17 +139,33 @@
                         <label for="professor">Professor:</label>
                         <input type="text" id="professor" placeholder="Nome do professor" required>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="data">Data:</label>
-                        <input type="date" id="data" required>
+                        <h3 class="section-title">Data e Hora de Início</h3>
+                        <div class="datetime-group">
+                            <div class="form-group">
+                                <label for="dataInicio">Data Início:</label>
+                                <input type="date" id="dataInicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaInicio">Hora Início:</label>
+                                <input type="time" id="horaInicio" required>
+                            </div>
+                        </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="horaInicio">Hora Início:</label>
-                        <input type="time" id="horaInicio" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="horaFim">Hora Término:</label>
-                        <input type="time" id="horaFim" required>
+                        <h3 class="section-title">Data e Hora de Término</h3>
+                        <div class="datetime-group">
+                            <div class="form-group">
+                                <label for="dataFim">Data Término:</label>
+                                <input type="date" id="dataFim" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horaFim">Hora Término:</label>
+                                <input type="time" id="horaFim" required>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <button class="btn btn-success" onclick="adicionarAgendamento()">
@@ -173,22 +203,35 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Sistema iniciado - Google Sheets conectado!');
             
-            // Configurar data como hoje
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('data').min = hoje;
-            document.getElementById('data').value = hoje;
-            
-            // Horários padrão
-            const agora = new Date();
-            const inicioPadrao = new Date(agora.getTime() + 60 * 60 * 1000);
-            const fimPadrao = new Date(inicioPadrao.getTime() + 2 * 60 * 60 * 1000);
-            
-            document.getElementById('horaInicio').value = inicioPadrao.toTimeString().slice(0, 5);
-            document.getElementById('horaFim').value = fimPadrao.toTimeString().slice(0, 5);
+            // Configurar datas iniciais
+            configurarDatasIniciais();
             
             // Carregar agendamentos
             carregarAgendamentos();
         });
+
+        function configurarDatasIniciais() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const amanha = new Date();
+            amanha.setDate(amanha.getDate() + 1);
+            const amanhaFormatada = amanha.toISOString().split('T')[0];
+            
+            // Data de início: hoje
+            document.getElementById('dataInicio').min = hoje;
+            document.getElementById('dataInicio').value = hoje;
+            
+            // Data de fim: amanhã
+            document.getElementById('dataFim').min = hoje;
+            document.getElementById('dataFim').value = amanhaFormatada;
+            
+            // Horários padrão
+            const agora = new Date();
+            const inicioPadrao = new Date(agora.getTime() + 60 * 60 * 1000); // +1 hora
+            const fimPadrao = new Date(inicioPadrao.getTime() + 2 * 60 * 60 * 1000); // +2 horas
+            
+            document.getElementById('horaInicio').value = inicioPadrao.toTimeString().slice(0, 5);
+            document.getElementById('horaFim').value = fimPadrao.toTimeString().slice(0, 5);
+        }
 
         async function carregarAgendamentos() {
             const container = document.getElementById('agendamentos-container');
@@ -295,30 +338,35 @@
         async function adicionarAgendamento() {
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
-            const data = document.getElementById('data').value;
+            const dataInicio = document.getElementById('dataInicio').value;
             const horaInicio = document.getElementById('horaInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
             const horaFim = document.getElementById('horaFim').value;
 
             // Validações
-            if (!sala || !professor || !data || !horaInicio || !horaFim) {
+            if (!sala || !professor || !dataInicio || !horaInicio || !dataFim || !horaFim) {
                 alert('❌ Por favor, preencha todos os campos!');
                 return;
             }
 
-            if (horaInicio >= horaFim) {
-                alert('❌ A hora de término deve ser posterior à hora de início!');
+            // Validar se data/hora de fim é posterior à data/hora de início
+            const inicioCompleto = new Date(`${dataInicio}T${horaInicio}`);
+            const fimCompleto = new Date(`${dataFim}T${horaFim}`);
+            
+            if (fimCompleto <= inicioCompleto) {
+                alert('❌ A data e hora de término devem ser posteriores à data e hora de início!');
                 return;
             }
 
-            // ✅ CORREÇÃO: Converter para formato "DD/MM/YYYY HH:mm"
-            const dataInicioFormatada = formatarDataParaBackend(data, horaInicio);
-            const dataFimFormatada = formatarDataParaBackend(data, horaFim);
+            // ✅ Converter para formato "DD/MM/YYYY HH:mm"
+            const dataInicioFormatada = formatarDataParaBackend(dataInicio, horaInicio);
+            const dataFimFormatada = formatarDataParaBackend(dataFim, horaFim);
 
             const novoAgendamento = {
                 sala: sala,
                 professor: professor,
-                inicio: dataInicioFormatada, // Agora no formato correto: "28/10/2025 14:30"
-                fim: dataFimFormatada       // Agora no formato correto: "28/10/2025 16:30"
+                inicio: dataInicioFormatada, // Formato: "28/10/2025 14:30"
+                fim: dataFimFormatada       // Formato: "29/10/2025 16:30"
             };
 
             const statusDiv = document.getElementById('api-status');
@@ -359,7 +407,7 @@
             }
         }
 
-        // ✅ NOVA FUNÇÃO: Converter data para formato "DD/MM/YYYY HH:mm"
+        // ✅ FUNÇÃO: Converter data para formato "DD/MM/YYYY HH:mm"
         function formatarDataParaBackend(dataString, horaString) {
             try {
                 // dataString vem como "YYYY-MM-DD", horaString como "HH:mm"
