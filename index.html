@@ -144,17 +144,17 @@
         }
 
         .agendamento-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border: 1px solid #e1e8ed;
             border-radius: 10px;
             padding: 20px;
             transition: all 0.3s ease;
             position: relative;
+            border-left: 6px solid;
         }
 
         .agendamento-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .agendamento-card h3 {
@@ -249,6 +249,42 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Cores específicas para cada sala */
+        .sala-1 {
+            background: linear-gradient(135deg, #ffeaea 0%, #ffd1d1 100%);
+            border-left-color: #e74c3c;
+        }
+
+        .sala-2 {
+            background: linear-gradient(135deg, #e8f4ff 0%, #d1e7ff 100%);
+            border-left-color: #3498db;
+        }
+
+        .sala-3 {
+            background: linear-gradient(135deg, #f0ffe8 0%, #e1ffd1 100%);
+            border-left-color: #2ecc71;
+        }
+
+        .sala-4 {
+            background: linear-gradient(135deg, #fff8e8 0%, #fff1d1 100%);
+            border-left-color: #f39c12;
+        }
+
+        .laboratorio-1 {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e8d1ff 100%);
+            border-left-color: #9b59b6;
+        }
+
+        .laboratorio-2 {
+            background: linear-gradient(135deg, #e8fffb 0%, #d1fff5 100%);
+            border-left-color: #1abc9c;
+        }
+
+        .auditorio {
+            background: linear-gradient(135deg, #fff0e8 0%, #ffe1d1 100%);
+            border-left-color: #e67e22;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -341,6 +377,17 @@
         const BIN_ID = '6900d42643b1c97be9876b0d';
         const API_KEY = '$2a$10$nkDFMJrpj5l1Mxy8jrFp1ulPMZzd/cWohj4q9.GDi/rt15744o/O6';
 
+        // Mapeamento de cores para cada sala
+        const coresSalas = {
+            'Sala 1': 'sala-1',
+            'Sala 2': 'sala-2',
+            'Sala 3': 'sala-3',
+            'Sala 4': 'sala-4',
+            'Laboratório 1': 'laboratorio-1',
+            'Laboratório 2': 'laboratorio-2',
+            'Auditório': 'auditorio'
+        };
+
         // Carregar agendamentos quando a página carregar
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Página carregada - iniciando sistema...');
@@ -415,9 +462,10 @@
                 const agora = new Date();
                 const dataInicio = new Date(ag.inicio);
                 const status = dataInicio > agora ? 'disponivel' : 'ocupado';
+                const corSala = coresSalas[ag.sala] || 'sala-1'; // Fallback para Sala 1
 
                 html += `
-                    <div class="agendamento-card">
+                    <div class="agendamento-card ${corSala}">
                         <div class="status-indicator ${status === 'ocupado' ? 'status-occupied' : ''}"></div>
                         <h3>${ag.sala}</h3>
                         <div class="agendamento-info">
