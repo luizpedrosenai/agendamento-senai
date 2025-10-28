@@ -134,6 +134,9 @@
                 <button class="btn btn-success" onclick="adicionarAgendamento()">
                     💾 Salvar Agendamento
                 </button>
+                <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit', '_blank')" style="margin-left: 10px;">
+                    📊 Ver Planilha
+                </button>
             </section>
 
             <section class="agendamentos-section">
@@ -154,12 +157,14 @@
     </div>
 
     <script>
-        // 🔄 SUBSTITUA PELA SUA URL DO GOOGLE APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/SUA_URL_AQUI/exec";
+        // ✅ SUA URL DA API
+        const API_URL = "https://script.google.com/macros/s/AKfycby1MaNb1jb4NeTqjVhltCXj_FmeCxlr4jF_Ci1gdWwdmCClbQfb3c7oNgHnxhBxUgK-1g/exec";
         
         let agendamentos = [];
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Sistema iniciado - GitHub Pages + Google Sheets');
+            
             // Configurar data como hoje
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('data').min = hoje;
@@ -200,19 +205,21 @@
                 agendamentos = Array.isArray(data) ? data : [];
                 
                 statusDiv.className = 'api-status api-online';
-                statusDiv.innerHTML = `✅ Conectado - ${agendamentos.length} agendamentos`;
+                statusDiv.innerHTML = `✅ Conectado - ${agendamentos.length} agendamentos carregados`;
                 
                 exibirAgendamentos(agendamentos);
                 
             } catch (error) {
+                console.error('Erro ao carregar:', error);
                 statusDiv.className = 'api-status api-offline';
-                statusDiv.innerHTML = '❌ Erro de conexão';
+                statusDiv.innerHTML = '❌ Erro de conexão com Google Sheets';
                 
                 container.innerHTML = `
                     <div class="loading">
                         <div style="font-size: 3em; margin-bottom: 20px;">❌</div>
                         <h3>Erro de Conexão</h3>
-                        <p>Verifique se a URL da API está correta</p>
+                        <p>Não foi possível conectar com o Google Sheets.</p>
+                        <p><em>${error.message}</em></p>
                         <button class="btn" onclick="carregarAgendamentos()" style="margin-top: 20px;">
                             🔄 Tentar Novamente
                         </button>
@@ -229,7 +236,7 @@
                     <div class="loading">
                         <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
                         <h3>Nenhum agendamento</h3>
-                        <p>Adicione o primeiro agendamento!</p>
+                        <p>A planilha está vazia. Adicione o primeiro agendamento!</p>
                     </div>
                 `;
                 return;
@@ -289,7 +296,7 @@
             try {
                 statusDiv.style.display = 'block';
                 statusDiv.className = 'api-status api-online';
-                statusDiv.innerHTML = '💾 Salvando...';
+                statusDiv.innerHTML = '💾 Salvando na planilha...';
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -300,20 +307,23 @@
                 const resultado = await response.json();
                 
                 if (resultado.status === "sucesso") {
-                    statusDiv.innerHTML = '✅ Agendamento salvo!';
+                    statusDiv.innerHTML = '✅ Agendamento salvo na planilha!';
                     alert('✅ Agendamento salvo com sucesso!');
                     
+                    // Limpar formulário
                     document.getElementById('sala').value = '';
                     document.getElementById('professor').value = '';
                     
+                    // Recarregar lista
                     setTimeout(() => carregarAgendamentos(), 2000);
                     
                 } else throw new Error(resultado.error);
                 
             } catch (error) {
+                console.error('Erro ao salvar:', error);
                 statusDiv.className = 'api-status api-offline';
-                statusDiv.innerHTML = '❌ Erro ao salvar';
-                alert('❌ Erro: ' + error.message);
+                statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
+                alert('❌ Erro ao salvar: ' + error.message);
             }
         }
 
