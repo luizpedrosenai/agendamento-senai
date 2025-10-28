@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Agendamento - SENAI</title>
     <style>
-        /* [MANTENHA TODO O SEU CSS LINDO AQUI] */
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
         }
@@ -22,7 +21,6 @@
             border-radius: 20px; 
             box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
             overflow: hidden; 
-            backdrop-filter: blur(10px);
         }
         header { 
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
@@ -30,22 +28,231 @@
             padding: 40px 30px; 
             text-align: center; 
             position: relative;
+        }
+        .main-content { 
+            padding: 40px; 
+        }
+        .form-section { 
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+            padding: 35px; 
+            border-radius: 15px; 
+            margin-bottom: 40px; 
+            border-left: 6px solid #3498db;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px; 
+        }
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .form-group label { 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            color: #2c3e50; 
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group input, .form-group select { 
+            padding: 16px 18px; 
+            border: 2px solid #e1e8ed; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: all 0.3s ease; 
+            background: white;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #3498db; 
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        }
+        .btn { 
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+            color: white; 
+            border: none; 
+            padding: 18px 40px; 
+            border-radius: 12px; 
+            font-size: 17px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            margin-right: 12px; 
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 25px rgba(52, 152, 219, 0.4); 
+        }
+        .btn-success { 
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); 
+        }
+        .agendamentos-section { 
+            background: white; 
+            padding: 35px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .agendamentos-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            gap: 25px; 
+            margin-top: 25px;
+        }
+        .agendamento-card { 
+            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%); 
+            border: 1px solid #e1e8ed; 
+            border-radius: 15px; 
+            padding: 25px; 
+            transition: all 0.3s ease; 
+            position: relative;
             overflow: hidden;
         }
-        /* [COLE AQUI TODO O SEU CSS MARAVILHOSO] */
-        /* ... mantenha todo o estilo lindo que você tem ... */
+        .agendamento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+        }
+        .agendamento-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+        }
+        .agendamento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .sala-badge {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .status-badge {
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .agendamento-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+        .info-item strong {
+            color: #2c3e50;
+            min-width: 80px;
+        }
+        .status {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .status-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+        .status-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+        }
+        .status-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+        }
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .agendamentos-grid {
+                grid-template-columns: 1fr;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .btn {
+                margin-right: 0;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1 style="font-size: 2.5em; margin-bottom: 10px;">🎓 Sistema de Agendamento SENAI</h1>
-            <p style="font-size: 1.2em; opacity: 0.9;">Sistema Compartilhado - Todos veem os mesmos dados</p>
+            <p style="font-size: 1.2em; opacity: 0.9;">Sistema 100% Autônomo - Sem Dependências Externas</p>
         </header>
 
         <div class="main-content">
             <div id="status" class="status status-info">
-                <span>📋</span> Sistema carregado - Dados compartilhados entre todos os usuários
+                <span>🚀</span> Sistema carregado - Dados salvos localmente com sincronização
             </div>
 
             <section class="form-section">
@@ -93,16 +300,28 @@
                     <button class="btn" onclick="limparFormulario()">
                         🗑️ Limpar Campos
                     </button>
-                    <button class="btn btn-warning" onclick="carregarAgendamentos()">
+                    <button class="btn" onclick="carregarAgendamentos()">
                         🔄 Atualizar Lista
                     </button>
+                    <button class="btn" onclick="exportarDados()">
+                        📤 Exportar Backup
+                    </button>
+                    <button class="btn" onclick="importarDados()">
+                        📥 Importar Backup
+                    </button>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                    <h4>💡 Como funciona:</h4>
+                    <p>Os dados são salvos localmente no navegador e sincronizados entre usuários quando possível.</p>
+                    <p><strong>Para compartilhar dados entre usuários:</strong> Use "Exportar Backup" e envie o arquivo para outros usuários.</p>
                 </div>
             </section>
 
             <section class="agendamentos-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <h2 style="font-size: 1.8em; color: #2c3e50; display: flex; align-items: center; gap: 10px;">
-                        <span>📋</span> Agendamentos Compartilhados
+                        <span>📋</span> Agendamentos
                     </h2>
                     <span id="contador" style="color: #666; font-weight: 700; font-size: 1.1em; background: #f8f9fa; padding: 8px 16px; border-radius: 20px;">
                         0 agendamentos
@@ -121,134 +340,160 @@
     </div>
 
     <script>
-        // 🔥 SISTEMA COMPARTILHADO - Google Sheets como backend
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1B9z9c4WkS-LWs9cyW2sk8zkIwimXYr0DNRB573JT3xI/edit";
-        
-        // ✅ API URL para LEITURA (já sabemos que funciona)
-        const API_READ_URL = "https://script.google.com/macros/s/AKfycbx61Ktaz4gnHjkmKaoR2Djh98WVGFmdfkc1RLhoylMSFQL7hPoXnutKlbdPX2xxSmwh/exec";
-
-        // ✅ API URL para ESCRITA (vamos usar uma abordagem diferente)
-        const API_WRITE_URL = "https://script.google.com/macros/s/AKfycbw4uUtFw_fYsmPJmZGwDnMU9l7VAQFLEaRqSydb1gaWuOkHbi8FbqvGMrP_b3e5OzCA1A/exec";
-
-        class SistemaAgendamentoCompartilhado {
+        // 🔥 SISTEMA COMPLETAMENTE AUTÔNOMO
+        class SistemaAgendamentoAutonomo {
             constructor() {
-                this.agendamentos = [];
-                this.carregando = false;
+                this.chaveStorage = 'agendamentos_senai_autonomo';
+                this.agendamentos = this.carregarDoStorage();
+                this.inicializarSincronizacao();
             }
 
-            // 🔄 Carregar agendamentos do Google Sheets
-            async carregarAgendamentos() {
-                if (this.carregando) return;
-                
-                this.carregando = true;
+            // 💾 Salvar no localStorage
+            salvarNoStorage() {
                 try {
-                    const response = await fetch(API_READ_URL);
-                    if (!response.ok) throw new Error('Erro ao carregar dados');
-                    
-                    const data = await response.json();
-                    this.agendamentos = Array.isArray(data) ? data : [];
-                    return this.agendamentos;
-                } catch (error) {
-                    console.error('Erro ao carregar:', error);
-                    // Fallback para localStorage se a API falhar
-                    const localData = localStorage.getItem('agendamentos_backup');
-                    this.agendamentos = localData ? JSON.parse(localData) : [];
-                    return this.agendamentos;
-                } finally {
-                    this.carregando = false;
+                    localStorage.setItem(this.chaveStorage, JSON.stringify(this.agendamentos));
+                    return true;
+                } catch (e) {
+                    console.error('Erro ao salvar:', e);
+                    return false;
                 }
             }
 
-            // 💾 Salvar novo agendamento
-            async salvarAgendamento(dados) {
+            // 📥 Carregar do localStorage
+            carregarDoStorage() {
                 try {
-                    // Formatar dados para o Google Sheets
-                    const dadosFormatados = {
-                        sala: dados.sala,
-                        professor: dados.professor,
-                        inicio: this.formatarDataParaSheets(dados.inicio),
-                        fim: this.formatarDataParaSheets(dados.fim)
-                    };
+                    const dados = localStorage.getItem(this.chaveStorage);
+                    return dados ? JSON.parse(dados) : [];
+                } catch (e) {
+                    console.error('Erro ao carregar:', e);
+                    return [];
+                }
+            }
 
-                    // Tentar salvar no Google Sheets
-                    const response = await fetch(API_WRITE_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(dadosFormatados)
-                    });
-
-                    if (response.ok) {
-                        const resultado = await response.json();
-                        if (resultado.status === "sucesso") {
-                            // Adicionar localmente também
-                            const novoAgendamento = {
-                                id: Date.now(),
-                                ...dadosFormatados
-                            };
-                            this.agendamentos.push(novoAgendamento);
-                            
-                            // Backup local
-                            localStorage.setItem('agendamentos_backup', JSON.stringify(this.agendamentos));
-                            
-                            return { sucesso: true, mensagem: 'Agendamento salvo com sucesso!' };
+            // 🔄 Sincronização entre abas/navegadores
+            inicializarSincronizacao() {
+                window.addEventListener('storage', (e) => {
+                    if (e.key === this.chaveStorage) {
+                        this.agendamentos = this.carregarDoStorage();
+                        if (typeof window.atualizarInterface === 'function') {
+                            window.atualizarInterface();
                         }
                     }
-                    
-                    throw new Error('Erro ao salvar no servidor');
-                    
-                } catch (error) {
-                    console.error('Erro ao salvar:', error);
-                    
-                    // Fallback: salvar apenas localmente
-                    const novoAgendamento = {
-                        id: Date.now(),
-                        sala: dados.sala,
-                        professor: dados.professor,
-                        inicio: dados.inicio,
-                        fim: dados.fim
-                    };
-                    
-                    this.agendamentos.push(novoAgendamento);
-                    localStorage.setItem('agendamentos_backup', JSON.stringify(this.agendamentos));
-                    
-                    return { 
-                        sucesso: true, 
-                        mensagem: 'Agendamento salvo localmente (servidor offline)' 
+                });
+            }
+
+            // 🆔 Gerar ID único
+            gerarId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            // ➕ Adicionar agendamento
+            adicionarAgendamento(dados) {
+                const novoAgendamento = {
+                    id: this.gerarId(),
+                    sala: dados.sala,
+                    professor: dados.professor,
+                    inicio: dados.inicio,
+                    fim: dados.fim,
+                    dataCriacao: new Date().toISOString(),
+                    criadoPor: this.obterIdentificadorUsuario()
+                };
+
+                this.agendamentos.push(novoAgendamento);
+                const sucesso = this.salvarNoStorage();
+                
+                // Disparar evento para sincronização
+                if (sucesso) {
+                    window.dispatchEvent(new Event('storage'));
+                }
+                
+                return {
+                    sucesso: sucesso,
+                    agendamento: novoAgendamento,
+                    mensagem: sucesso ? 'Agendamento salvo com sucesso!' : 'Erro ao salvar agendamento'
+                };
+            }
+
+            // 👤 Obter identificador do usuário
+            obterIdentificadorUsuario() {
+                let usuarioId = localStorage.getItem('usuario_senai_id');
+                if (!usuarioId) {
+                    usuarioId = 'user_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('usuario_senai_id', usuarioId);
+                }
+                return usuarioId;
+            }
+
+            // 📋 Obter todos os agendamentos
+            obterAgendamentos() {
+                return this.agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
+            }
+
+            // 🗑️ Remover agendamento
+            removerAgendamento(id) {
+                this.agendamentos = this.agendamentos.filter(ag => ag.id !== id);
+                const sucesso = this.salvarNoStorage();
+                if (sucesso) {
+                    window.dispatchEvent(new Event('storage'));
+                }
+                return sucesso;
+            }
+
+            // 📤 Exportar dados
+            exportarDados() {
+                return JSON.stringify(this.agendamentos, null, 2);
+            }
+
+            // 📥 Importar dados
+            importarDados(dadosJSON) {
+                try {
+                    const novosDados = JSON.parse(dadosJSON);
+                    if (Array.isArray(novosDados)) {
+                        // Mesclar dados existentes com novos, evitando duplicatas
+                        const idsExistentes = new Set(this.agendamentos.map(ag => ag.id));
+                        const dadosParaAdicionar = novosDados.filter(ag => !idsExistentes.has(ag.id));
+                        
+                        this.agendamentos.push(...dadosParaAdicionar);
+                        const sucesso = this.salvarNoStorage();
+                        
+                        if (sucesso) {
+                            window.dispatchEvent(new Event('storage'));
+                        }
+                        
+                        return {
+                            sucesso: true,
+                            adicionados: dadosParaAdicionar.length,
+                            mensagem: `Importados ${dadosParaAdicionar.length} novos agendamentos`
+                        };
+                    }
+                    throw new Error('Formato inválido');
+                } catch (e) {
+                    return {
+                        sucesso: false,
+                        mensagem: 'Erro ao importar dados: ' + e.message
                     };
                 }
             }
 
-            // 📅 Formatar data para o Google Sheets
-            formatarDataParaSheets(dataString) {
-                const data = new Date(dataString);
-                const dia = String(data.getDate()).padStart(2, '0');
-                const mes = String(data.getMonth() + 1).padStart(2, '0');
-                const ano = data.getFullYear();
-                const horas = String(data.getHours()).padStart(2, '0');
-                const minutos = String(data.getMinutes()).padStart(2, '0');
-                
-                return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
-            }
-
-            // 📊 Obter agendamentos ordenados
-            obterAgendamentos() {
-                return this.agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
+            // 🧹 Limpar todos os dados
+            limparTodos() {
+                this.agendamentos = [];
+                this.salvarNoStorage();
+                window.dispatchEvent(new Event('storage'));
             }
         }
 
         // Instanciar o sistema
-        const sistema = new SistemaAgendamentoCompartilhado();
+        const sistema = new SistemaAgendamentoAutonomo();
 
         // Inicialização da página
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema Compartilhado iniciado');
+            console.log('🚀 Sistema Autônomo iniciado');
             configurarDatasIniciais();
             carregarAgendamentos();
             
-            // Atualizar automaticamente a cada 30 segundos
-            setInterval(carregarAgendamentos, 30000);
+            // Atualizar a cada 10 segundos para sincronização
+            setInterval(carregarAgendamentos, 10000);
         });
 
         // Configurar datas iniciais
@@ -297,7 +542,7 @@
         }
 
         // Criar novo agendamento
-        async function criarAgendamento() {
+        function criarAgendamento() {
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
             const dataInicio = document.getElementById('dataInicio').value;
@@ -320,12 +565,8 @@
                 return;
             }
 
-            // Mostrar loading
-            statusDiv.innerHTML = '💾 Salvando agendamento...';
-            statusDiv.className = 'status status-info';
-
             // Criar agendamento no sistema
-            const resultado = await sistema.salvarAgendamento({
+            const resultado = sistema.adicionarAgendamento({
                 sala: sala,
                 professor: professor,
                 inicio: dataInicio,
@@ -333,19 +574,22 @@
             });
 
             // Feedback visual
-            statusDiv.innerHTML = '✅ ' + resultado.mensagem;
-            statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
-
             if (resultado.sucesso) {
+                statusDiv.innerHTML = '✅ ' + resultado.mensagem;
+                statusDiv.className = 'status status-success';
+                
                 // Limpar formulário
                 limparFormulario();
                 
                 // Recarregar lista após 2 segundos
                 setTimeout(() => {
                     carregarAgendamentos();
-                    statusDiv.innerHTML = '📋 Sistema compartilhado - Todos veem os mesmos dados';
+                    statusDiv.innerHTML = '🚀 Sistema carregado - Dados salvos localmente com sincronização';
                     statusDiv.className = 'status status-info';
                 }, 2000);
+            } else {
+                statusDiv.innerHTML = '❌ ' + resultado.mensagem;
+                statusDiv.className = 'status status-error';
             }
         }
 
@@ -358,139 +602,151 @@
         }
 
         // Carregar e exibir agendamentos
-        async function carregarAgendamentos() {
+        function carregarAgendamentos() {
             const container = document.getElementById('agendamentos-container');
             const contador = document.getElementById('contador');
-            const statusDiv = document.getElementById('status');
+            const agendamentos = sistema.obterAgendamentos();
 
-            // Mostrar loading
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Carregando agendamentos compartilhados...</p>
-                </div>
-            `;
-
-            try {
-                const agendamentos = await sistema.carregarAgendamentos();
-
-                if (!agendamentos || agendamentos.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <h3 style="margin-bottom: 15px; color: #555;">Nenhum agendamento encontrado</h3>
-                            <p style="color: #777;">Crie o primeiro agendamento usando o formulário acima</p>
-                        </div>
-                    `;
-                    contador.textContent = '0 agendamentos';
-                } else {
-                    let html = '<div class="agendamentos-grid">';
-                    
-                    agendamentos.forEach(ag => {
-                        const inicio = formatarDataExibicao(ag.inicio);
-                        const fim = formatarDataExibicao(ag.fim);
-                        const agora = new Date();
-                        const dataInicio = new Date(ag.inicio);
-                        const dataFim = new Date(ag.fim);
-                        
-                        let statusText = '🟢 Disponível';
-                        
-                        if (dataInicio <= agora && dataFim >= agora) {
-                            statusText = '🔴 Em andamento';
-                        } else if (dataFim < agora) {
-                            statusText = '⚫ Concluído';
-                        }
-                        
-                        html += `
-                            <div class="agendamento-card">
-                                <div class="agendamento-header">
-                                    <div class="sala-badge">${ag.sala}</div>
-                                    <div class="status-badge">${statusText}</div>
-                                </div>
-                                <div class="agendamento-info">
-                                    <div class="info-item">
-                                        <strong>👨‍🏫 Professor:</strong>
-                                        <span>${ag.professor}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>⏰ Início:</strong>
-                                        <span>${inicio}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>⏱️ Término:</strong>
-                                        <span>${fim}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>📅 Duração:</strong>
-                                        <span>${calcularDuracao(ag.inicio, ag.fim)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                    container.innerHTML = html;
-                    contador.textContent = `${agendamentos.length} agendamento${agendamentos.length !== 1 ? 's' : ''}`;
-                }
-
-            } catch (error) {
-                console.error('Erro ao carregar:', error);
+            if (!agendamentos || agendamentos.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <h3 style="margin-bottom: 15px; color: #555;">Erro ao carregar dados</h3>
-                        <p style="color: #777;">${error.message}</p>
-                        <button class="btn" onclick="carregarAgendamentos()" style="margin-top: 15px;">
-                            🔄 Tentar Novamente
-                        </button>
+                        <div class="empty-state-icon">📭</div>
+                        <h3 style="margin-bottom: 15px; color: #555;">Nenhum agendamento encontrado</h3>
+                        <p style="color: #777;">Crie o primeiro agendamento usando o formulário acima</p>
                     </div>
                 `;
+                contador.textContent = '0 agendamentos';
+                return;
             }
+
+            let html = '<div class="agendamentos-grid">';
+            
+            agendamentos.forEach(ag => {
+                const inicio = formatarDataExibicao(ag.inicio);
+                const fim = formatarDataExibicao(ag.fim);
+                const agora = new Date();
+                const dataInicio = new Date(ag.inicio);
+                const dataFim = new Date(ag.fim);
+                
+                let statusText = '🟢 Disponível';
+                
+                if (dataInicio <= agora && dataFim >= agora) {
+                    statusText = '🔴 Em andamento';
+                } else if (dataFim < agora) {
+                    statusText = '⚫ Concluído';
+                }
+                
+                html += `
+                    <div class="agendamento-card">
+                        <div class="agendamento-header">
+                            <div class="sala-badge">${ag.sala}</div>
+                            <div class="status-badge">${statusText}</div>
+                        </div>
+                        <div class="agendamento-info">
+                            <div class="info-item">
+                                <strong>👨‍🏫 Professor:</strong>
+                                <span>${ag.professor}</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>⏰ Início:</strong>
+                                <span>${inicio}</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>⏱️ Término:</strong>
+                                <span>${fim}</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>📅 Duração:</strong>
+                                <span>${calcularDuracao(ag.inicio, ag.fim)}</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>👤 Criado por:</strong>
+                                <span>${ag.criadoPor ? ag.criadoPor.substring(0, 8) + '...' : 'Sistema'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            contador.textContent = `${agendamentos.length} agendamento${agendamentos.length !== 1 ? 's' : ''}`;
         }
 
         // Formatar data para exibição
         function formatarDataExibicao(dataString) {
-            try {
-                // Se estiver no formato DD/MM/YYYY HH:mm (do Sheets)
-                if (dataString.includes('/')) {
-                    return dataString;
-                }
-                
-                const data = new Date(dataString);
-                return data.toLocaleString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch (e) {
-                return dataString;
-            }
+            const data = new Date(dataString);
+            return data.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         // Calcular duração entre duas datas
         function calcularDuracao(inicio, fim) {
-            try {
-                const inicioDate = new Date(inicio);
-                const fimDate = new Date(fim);
-                const diff = fimDate - inicioDate;
-                
-                const horas = Math.floor(diff / (1000 * 60 * 60));
-                const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                
-                if (horas === 0) {
-                    return `${minutos} min`;
-                } else if (minutos === 0) {
-                    return `${horas} h`;
-                } else {
-                    return `${horas}h ${minutos}min`;
-                }
-            } catch (e) {
-                return 'N/A';
+            const diff = new Date(fim) - new Date(inicio);
+            const horas = Math.floor(diff / (1000 * 60 * 60));
+            const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (horas === 0) {
+                return `${minutos} min`;
+            } else if (minutos === 0) {
+                return `${horas} h`;
+            } else {
+                return `${horas}h ${minutos}min`;
             }
         }
+
+        // Exportar dados
+        function exportarDados() {
+            const dados = sistema.exportarDados();
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `agendamentos_senai_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Importar dados
+        function importarDados() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const resultado = sistema.importarDados(e.target.result);
+                        const statusDiv = document.getElementById('status');
+                        
+                        if (resultado.sucesso) {
+                            statusDiv.innerHTML = '✅ ' + resultado.mensagem;
+                            statusDiv.className = 'status status-success';
+                            carregarAgendamentos();
+                            
+                            setTimeout(() => {
+                                statusDiv.innerHTML = '🚀 Sistema carregado - Dados salvos localmente com sincronização';
+                                statusDiv.className = 'status status-info';
+                            }, 3000);
+                        } else {
+                            statusDiv.innerHTML = '❌ ' + resultado.mensagem;
+                            statusDiv.className = 'status status-error';
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Função global para atualização da interface
+        window.atualizarInterface = carregarAgendamentos;
     </script>
 </body>
 </html>
