@@ -103,6 +103,12 @@
             border-bottom: 2px solid #e1e8ed;
             color: #2c3e50;
         }
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -146,10 +152,12 @@
                             <div class="form-group">
                                 <label for="dataInicio">Data Início:</label>
                                 <input type="date" id="dataInicio" required>
+                                <div id="erroDataInicio" class="error-message"></div>
                             </div>
                             <div class="form-group">
                                 <label for="horaInicio">Hora Início:</label>
                                 <input type="time" id="horaInicio" required>
+                                <div id="erroHoraInicio" class="error-message"></div>
                             </div>
                         </div>
                     </div>
@@ -160,14 +168,17 @@
                             <div class="form-group">
                                 <label for="dataFim">Data Término:</label>
                                 <input type="date" id="dataFim" required>
+                                <div id="erroDataFim" class="error-message"></div>
                             </div>
                             <div class="form-group">
                                 <label for="horaFim">Hora Término:</label>
                                 <input type="time" id="horaFim" required>
+                                <div id="erroHoraFim" class="error-message"></div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div id="erroGeral" class="error-message" style="text-align: center; margin: 15px 0;"></div>
                 <button class="btn btn-success" onclick="adicionarAgendamento()">
                     💾 Salvar na Planilha Google
                 </button>
@@ -211,26 +222,61 @@
         });
 
         function configurarDatasIniciais() {
-            const hoje = new Date().toISOString().split('T')[0];
-            const amanha = new Date();
-            amanha.setDate(amanha.getDate() + 1);
-            const amanhaFormatada = amanha.toISOString().split('T')[0];
+            const hoje = new Date();
+            const hojeFormatada = hoje.toISOString().split('T')[0];
             
             // Data de início: hoje
-            document.getElementById('dataInicio').min = hoje;
-            document.getElementById('dataInicio').value = hoje;
+            document.getElementById('dataInicio').min = hojeFormatada;
+            document.getElementById('dataInicio').value = hojeFormatada;
             
-            // Data de fim: amanhã
-            document.getElementById('dataFim').min = hoje;
-            document.getElementById('dataFim').value = amanhaFormatada;
+            // Data de fim: hoje (inicialmente)
+            document.getElementById('dataFim').min = hojeFormatada;
+            document.getElementById('dataFim').value = hojeFormatada;
             
-            // Horários padrão
-            const agora = new Date();
-            const inicioPadrao = new Date(agora.getTime() + 60 * 60 * 1000); // +1 hora
-            const fimPadrao = new Date(inicioPadrao.getTime() + 2 * 60 * 60 * 1000); // +2 horas
+            // Horários padrão - início em 1 hora, fim em 2 horas
+            const inicioPadrao = new Date(hoje.getTime() + 60 * 60 * 1000);
+            const fimPadrao = new Date(inicioPadrao.getTime() + 60 * 60 * 1000);
             
             document.getElementById('horaInicio').value = inicioPadrao.toTimeString().slice(0, 5);
             document.getElementById('horaFim').value = fimPadrao.toTimeString().slice(0, 5);
+            
+            // Adicionar event listeners para validação em tempo real
+            document.getElementById('dataInicio').addEventListener('change', validarDatas);
+            document.getElementById('horaInicio').addEventListener('change', validarDatas);
+            document.getElementById('dataFim').addEventListener('change', validarDatas);
+            document.getElementById('horaFim').addEventListener('change', validarDatas);
+        }
+
+        function validarDatas() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const horaInicio = document.getElementById('horaInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            const horaFim = document.getElementById('horaFim').value;
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            
+            if (!dataInicio || !horaInicio || !dataFim || !horaFim) {
+                return true; // Campos não preenchidos ainda
+            }
+            
+            // Criar objetos Date para comparação
+            const inicio = new Date(`${dataInicio}T${horaInicio}`);
+            const fim = new Date(`${dataFim}T${horaFim}`);
+            
+            // Validar se data de fim é posterior à data de início
+            if (fim <= inicio) {
+                document.getElementById('erroDataFim').textContent = 'A data de término deve ser posterior à data de início';
+                document.getElementById('erroDataFim').style.display = 'block';
+                document.getElementById('erroHoraFim').textContent = 'A hora de término deve ser posterior à hora de início';
+                document.getElementById('erroHoraFim').style.display = 'block';
+                return false;
+            }
+            
+            return true;
         }
 
         async function carregarAgendamentos() {
@@ -301,20 +347,17 @@
             let html = '<div class="agendamentos-grid">';
             
             agendamentos.forEach(ag => {
-                const inicio = formatarData(ag.inicio);
-                const fim = formatarData(ag.fim);
+                const inicio = formatarDataExibicao(ag.inicio);
+                const fim = formatarDataExibicao(ag.fim);
                 const agora = new Date();
                 const dataInicio = new Date(ag.inicio);
                 const dataFim = new Date(ag.fim);
                 
-                let status = 'disponivel';
                 let statusText = '🟢 Disponível';
                 
                 if (dataInicio <= agora && dataFim >= agora) {
-                    status = 'ocupado';
                     statusText = '🔴 Em andamento';
                 } else if (dataFim < agora) {
-                    status = 'concluido';
                     statusText = '⚫ Concluído';
                 }
                 
@@ -343,22 +386,27 @@
             const dataFim = document.getElementById('dataFim').value;
             const horaFim = document.getElementById('horaFim').value;
 
-            // Validações
+            // Limpar erros anteriores
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+
+            // Validações básicas
             if (!sala || !professor || !dataInicio || !horaInicio || !dataFim || !horaFim) {
-                alert('❌ Por favor, preencha todos os campos!');
+                document.getElementById('erroGeral').textContent = '❌ Por favor, preencha todos os campos!';
+                document.getElementById('erroGeral').style.display = 'block';
                 return;
             }
 
-            // Validar se data/hora de fim é posterior à data/hora de início
-            const inicioCompleto = new Date(`${dataInicio}T${horaInicio}`);
-            const fimCompleto = new Date(`${dataFim}T${horaFim}`);
-            
-            if (fimCompleto <= inicioCompleto) {
-                alert('❌ A data e hora de término devem ser posteriores à data e hora de início!');
+            // Validar datas
+            if (!validarDatas()) {
+                document.getElementById('erroGeral').textContent = '❌ Corrija os erros nas datas antes de salvar';
+                document.getElementById('erroGeral').style.display = 'block';
                 return;
             }
 
-            // ✅ Converter para formato "DD/MM/YYYY HH:mm"
+            // ✅ Converter para formato "DD/MM/YYYY HH:mm" que o backend espera
             const dataInicioFormatada = formatarDataParaBackend(dataInicio, horaInicio);
             const dataFimFormatada = formatarDataParaBackend(dataFim, horaFim);
 
@@ -366,7 +414,7 @@
                 sala: sala,
                 professor: professor,
                 inicio: dataInicioFormatada, // Formato: "28/10/2025 14:30"
-                fim: dataFimFormatada       // Formato: "29/10/2025 16:30"
+                fim: dataFimFormatada       // Formato: "28/10/2025 16:30"
             };
 
             const statusDiv = document.getElementById('api-status');
@@ -385,7 +433,13 @@
                 
                 if (resultado.status === "sucesso") {
                     statusDiv.innerHTML = '✅ Agendamento salvo na planilha!';
-                    alert('🎉 SUCESSO! Agendamento salvo no Google Sheets!\n\nID: ' + resultado.id);
+                    
+                    // Mostrar mensagem de sucesso
+                    document.getElementById('erroGeral').textContent = '🎉 SUCESSO! Agendamento salvo no Google Sheets!';
+                    document.getElementById('erroGeral').style.display = 'block';
+                    document.getElementById('erroGeral').style.color = '#155724';
+                    document.getElementById('erroGeral').style.background = '#d4edda';
+                    document.getElementById('erroGeral').style.border = '1px solid #c3e6cb';
                     
                     // Limpar formulário (apenas alguns campos)
                     document.getElementById('professor').value = '';
@@ -393,7 +447,9 @@
                     // Recarregar lista após 2 segundos
                     setTimeout(() => {
                         carregarAgendamentos();
-                    }, 2000);
+                        // Limpar mensagem de sucesso
+                        document.getElementById('erroGeral').style.display = 'none';
+                    }, 3000);
                     
                 } else {
                     throw new Error(resultado.error || 'Erro desconhecido');
@@ -403,7 +459,8 @@
                 console.error('Erro ao salvar:', error);
                 statusDiv.className = 'api-status api-offline';
                 statusDiv.innerHTML = '❌ Erro ao salvar na planilha';
-                alert('❌ Erro ao salvar: ' + error.message);
+                document.getElementById('erroGeral').textContent = '❌ Erro ao salvar: ' + error.message;
+                document.getElementById('erroGeral').style.display = 'block';
             }
         }
 
@@ -422,12 +479,26 @@
             }
         }
 
-        function formatarData(dataString) {
+        // ✅ FUNÇÃO: Formatar data para exibição
+        function formatarDataExibicao(dataString) {
             try {
+                // Se a data já estiver no formato do backend "DD/MM/YYYY HH:mm"
+                if (dataString.includes('/')) {
+                    const [dataParte, tempoParte] = dataString.split(' ');
+                    const [dia, mes, ano] = dataParte.split('/');
+                    const [hora, minuto] = tempoParte.split(':');
+                    
+                    return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+                }
+                
+                // Se estiver em outro formato, tenta converter
                 const data = new Date(dataString);
                 return data.toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit'
                 });
             } catch (e) {
                 return dataString;
