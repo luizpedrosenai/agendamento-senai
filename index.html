@@ -97,6 +97,44 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
+        .dias-checkbox {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .dia-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e1e8ed;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dia-option:hover {
+            background: #e9ecef;
+        }
+
+        .dia-option input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .dias-selecionados {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4ff;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 0.9em;
+        }
+
         .btn {
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             color: white;
@@ -373,6 +411,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .dias-checkbox {
+                grid-template-columns: 1fr;
+            }
+
             .filtros-grid {
                 grid-template-columns: 1fr;
             }
@@ -425,16 +467,30 @@
                         <input type="text" id="professor" placeholder="Nome do professor">
                     </div>
                     <div class="form-group">
-                        <label for="diaSemana">Dia da Semana:</label>
-                        <select id="diaSemana">
-                            <option value="">Selecione o dia</option>
-                            <option value="Segunda-feira">Segunda-feira</option>
-                            <option value="Terça-feira">Terça-feira</option>
-                            <option value="Quarta-feira">Quarta-feira</option>
-                            <option value="Quinta-feira">Quinta-feira</option>
-                            <option value="Sexta-feira">Sexta-feira</option>
-                            <option value="Sábado">Sábado</option>
-                        </select>
+                        <label>Dias da Semana:</label>
+                        <div class="dias-checkbox">
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Segunda-feira"> Segunda-feira
+                            </label>
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Terça-feira"> Terça-feira
+                            </label>
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Quarta-feira"> Quarta-feira
+                            </label>
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Quinta-feira"> Quinta-feira
+                            </label>
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Sexta-feira"> Sexta-feira
+                            </label>
+                            <label class="dia-option">
+                                <input type="checkbox" name="diaSemana" value="Sábado"> Sábado
+                            </label>
+                        </div>
+                        <div id="dias-selecionados" class="dias-selecionados" style="display: none;">
+                            <strong>Dias selecionados:</strong> <span id="dias-texto"></span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="periodo">Período:</label>
@@ -547,7 +603,27 @@
             const dataMinima = agora.toISOString().slice(0, 16);
             document.getElementById('inicio').min = dataMinima;
             document.getElementById('fim').min = dataMinima;
+
+            // Atualizar display dos dias selecionados
+            document.querySelectorAll('input[name="diaSemana"]').forEach(checkbox => {
+                checkbox.addEventListener('change', atualizarDiasSelecionados);
+            });
         });
+
+        function atualizarDiasSelecionados() {
+            const diasSelecionados = Array.from(document.querySelectorAll('input[name="diaSemana"]:checked'))
+                .map(cb => cb.value);
+            
+            const diasContainer = document.getElementById('dias-selecionados');
+            const diasTexto = document.getElementById('dias-texto');
+            
+            if (diasSelecionados.length > 0) {
+                diasTexto.textContent = diasSelecionados.join(', ');
+                diasContainer.style.display = 'block';
+            } else {
+                diasContainer.style.display = 'none';
+            }
+        }
 
         function getAPIUrl() {
             return `https://api.jsonbin.io/v3/b/${BIN_ID}`;
@@ -764,13 +840,14 @@
         async function adicionarAgendamento() {
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
-            const diaSemana = document.getElementById('diaSemana').value;
+            const diasSelecionados = Array.from(document.querySelectorAll('input[name="diaSemana"]:checked'))
+                .map(cb => cb.value);
             const periodo = document.getElementById('periodo').value;
             const inicio = document.getElementById('inicio').value;
             const fim = document.getElementById('fim').value;
 
             // Validações
-            if (!sala || !professor || !diaSemana || !periodo || !inicio || !fim) {
+            if (!sala || !professor || diasSelecionados.length === 0 || !periodo || !inicio || !fim) {
                 alert('❌ Por favor, preencha todos os campos!');
                 return;
             }
@@ -795,36 +872,47 @@
                 const data = await response.json();
                 const agendamentos = data.record.agendamentos || [];
 
-                // Verificar conflitos - AGORA CONSIDERANDO DIA DA SEMANA E PERÍODO
-                const conflito = agendamentos.some(ag => {
-                    // Só há conflito se for na MESMA SALA, MESMO DIA e MESMO PERÍODO
-                    if (ag.sala === sala && ag.diaSemana === diaSemana && ag.periodo === periodo) {
-                        // E se houver sobreposição de horários
-                        return ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
-                               (new Date(fim) > new Date(ag.inicio) && new Date(fim) <= new Date(ag.fim)) ||
-                               (new Date(inicio) <= new Date(ag.inicio) && new Date(fim) >= new Date(ag.fim)));
-                    }
-                    return false; // Não há conflito se for em dias ou períodos diferentes
-                });
+                // Verificar conflitos para CADA DIA selecionado
+                let conflitoEncontrado = false;
+                let diaComConflito = '';
 
-                if (conflito) {
-                    alert('❌ Já existe um agendamento para esta sala no mesmo dia e período selecionado!');
+                for (const dia of diasSelecionados) {
+                    const conflito = agendamentos.some(ag => {
+                        // Só há conflito se for na MESMA SALA, MESMO DIA e MESMO PERÍODO
+                        if (ag.sala === sala && ag.diaSemana === dia && ag.periodo === periodo) {
+                            // E se houver sobreposição de horários
+                            return ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
+                                   (new Date(fim) > new Date(ag.inicio) && new Date(fim) <= new Date(ag.fim)) ||
+                                   (new Date(inicio) <= new Date(ag.inicio) && new Date(fim) >= new Date(ag.fim)));
+                        }
+                        return false;
+                    });
+
+                    if (conflito) {
+                        conflitoEncontrado = true;
+                        diaComConflito = dia;
+                        break;
+                    }
+                }
+
+                if (conflitoEncontrado) {
+                    alert(`❌ Já existe um agendamento para a ${sala} na ${diaComConflito} no período da ${periodo}!`);
                     return;
                 }
 
-                // Criar novo agendamento
-                const novoAgendamento = {
-                    id: Date.now(),
+                // Criar um agendamento para CADA DIA selecionado
+                const novosAgendamentos = diasSelecionados.map(dia => ({
+                    id: Date.now() + Math.random(), // ID único para cada agendamento
                     sala: sala,
                     professor: professor,
-                    diaSemana: diaSemana,
+                    diaSemana: dia,
                     periodo: periodo,
                     inicio: inicio,
                     fim: fim
-                };
+                }));
 
-                // Adicionar à lista
-                agendamentos.push(novoAgendamento);
+                // Adicionar todos os novos agendamentos à lista
+                agendamentos.push(...novosAgendamentos);
 
                 // Salvar no JSONBin
                 await salvarNoJSONBin({ agendamentos: agendamentos });
@@ -832,15 +920,16 @@
                 // Salvar localmente
                 localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentos));
 
-                alert('✅ Agendamento adicionado com sucesso!');
+                alert(`✅ ${diasSelecionados.length} agendamento(s) adicionado(s) com sucesso!`);
 
                 // Limpar formulário
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
-                document.getElementById('diaSemana').value = '';
+                document.querySelectorAll('input[name="diaSemana"]').forEach(cb => cb.checked = false);
                 document.getElementById('periodo').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
+                document.getElementById('dias-selecionados').style.display = 'none';
 
                 // Recarregar
                 carregarAgendamentos();
@@ -851,24 +940,27 @@
 
                 // Salvar localmente
                 const agendamentos = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
-                agendamentos.push({
-                    id: Date.now(),
+                const novosAgendamentos = diasSelecionados.map(dia => ({
+                    id: Date.now() + Math.random(),
                     sala: sala,
                     professor: professor,
-                    diaSemana: diaSemana,
+                    diaSemana: dia,
                     periodo: periodo,
                     inicio: inicio,
                     fim: fim
-                });
+                }));
+
+                agendamentos.push(...novosAgendamentos);
                 localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentos));
 
                 // Limpar e recarregar
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
-                document.getElementById('diaSemana').value = '';
+                document.querySelectorAll('input[name="diaSemana"]').forEach(cb => cb.checked = false);
                 document.getElementById('periodo').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
+                document.getElementById('dias-selecionados').style.display = 'none';
                 carregarAgendamentos();
             }
         }
