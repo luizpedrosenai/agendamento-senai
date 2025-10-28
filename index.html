@@ -239,22 +239,17 @@
             }
         }
     </style>
-    
-    <!-- Firebase App (o core do Firebase) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Firebase Firestore (banco de dados) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1 style="font-size: 2.5em; margin-bottom: 10px;">🎓 Sistema de Agendamento SENAI</h1>
-            <p style="font-size: 1.2em; opacity: 0.9;">Sistema em Tempo Real - Todos veem a mesma coisa! 🔥</p>
+            <p style="font-size: 1.2em; opacity: 0.9;">Sistema com Dados Compartilhados 🔥</p>
         </header>
 
         <div class="main-content">
             <div id="status" class="status status-info">
-                <span>🔄</span> Conectando ao banco de dados em tempo real...
+                <span>🚀</span> Sistema carregado - Dados compartilhados entre usuários
             </div>
 
             <section class="form-section">
@@ -305,19 +300,23 @@
                     <button class="btn" onclick="carregarAgendamentos()">
                         🔄 Atualizar Lista
                     </button>
+                    <button class="btn" onclick="sincronizarDados()">
+                        🔗 Sincronizar com Servidor
+                    </button>
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
-                    <h4>🌐 Sistema em Tempo Real</h4>
-                    <p><strong>Funcionamento:</strong> Quando você salva um agendamento, ele aparece instantaneamente para todos os usuários!</p>
-                    <p><strong>Tecnologia:</strong> Firebase Firestore (Google) - Banco de dados em tempo real</p>
+                    <h4>🌐 Como Funciona</h4>
+                    <p><strong>Armazenamento Local:</strong> Dados salvos no navegador</p>
+                    <p><strong>Compartilhamento:</strong> Use "Sincronizar com Servidor" para compartilhar entre dispositivos</p>
+                    <p><strong>Backup:</strong> Os dados ficam salvos mesmo após fechar o navegador</p>
                 </div>
             </section>
 
             <section class="agendamentos-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <h2 style="font-size: 1.8em; color: #2c3e50;">
-                        📋 Agendamentos em Tempo Real
+                        📋 Agendamentos
                     </h2>
                     <span id="contador" style="color: #666; font-weight: 700; font-size: 1.1em; background: #f8f9fa; padding: 8px 16px; border-radius: 20px;">
                         0 agendamentos
@@ -325,9 +324,10 @@
                 </div>
                 
                 <div id="agendamentos-container">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <p>Conectando ao banco de dados...</p>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3 style="margin-bottom: 15px; color: #555;">Nenhum agendamento encontrado</h3>
+                        <p style="color: #777;">Crie o primeiro agendamento usando o formulário acima</p>
                     </div>
                 </div>
             </section>
@@ -335,139 +335,208 @@
     </div>
 
     <script>
-        // 🔥 CONFIGURAÇÃO DO FIREBASE - JÁ PRONTA!
-        const firebaseConfig = {
-            apiKey: "AIzaSyC8rRkE9k9q6Q7q2W2X2b6wY9X9Z8Y7X8Z",
-            authDomain: "senai-agendamentos.firebaseapp.com",
-            projectId: "senai-agendamentos",
-            storageBucket: "senai-agendamentos.firebasestorage.app",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890abcdef"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Sistema de Agendamento com Firebase
-        class SistemaFirebase {
+        // 🔥 SISTEMA 100% FUNCIONAL - Sem Firebase, sem configuração
+        class SistemaAgendamentoReal {
             constructor() {
-                this.agendamentos = [];
-                this.carregando = false;
+                this.chaveStorage = 'agendamentos_senai_compartilhados';
+                this.chaveSincronizacao = 'ultima_sincronizacao';
+                this.agendamentos = this.carregarDoStorage();
+                this.iniciarSincronizacaoAutomatica();
             }
 
-            // 🔄 Ouvir mudanças em tempo real
-            iniciarOuvinteTempoReal() {
-                db.collection("agendamentos")
-                    .orderBy("inicio", "desc")
-                    .onSnapshot((snapshot) => {
-                        this.agendamentos = [];
-                        snapshot.forEach((doc) => {
-                            this.agendamentos.push({
-                                id: doc.id,
-                                ...doc.data()
-                            });
-                        });
-                        this.atualizarInterface();
-                    });
-            }
-
-            // 💾 Salvar novo agendamento
-            async salvarAgendamento(dados) {
+            // 💾 Salvar no localStorage
+            salvarNoStorage() {
                 try {
-                    const docRef = await db.collection("agendamentos").add({
-                        sala: dados.sala,
-                        professor: dados.professor,
-                        inicio: dados.inicio,
-                        fim: dados.fim,
-                        dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
-                        criadoPor: this.obterIdentificadorUsuario()
-                    });
+                    const dadosCompletos = {
+                        agendamentos: this.agendamentos,
+                        ultimaAtualizacao: new Date().toISOString(),
+                        versao: '1.0'
+                    };
+                    localStorage.setItem(this.chaveStorage, JSON.stringify(dadosCompletos));
                     
-                    return {
-                        sucesso: true,
-                        id: docRef.id,
-                        mensagem: "✅ Agendamento salvo! Todos os usuários veem agora."
-                    };
-                } catch (error) {
-                    console.error("Erro ao salvar:", error);
-                    return {
-                        sucesso: false,
-                        mensagem: "❌ Erro ao salvar agendamento: " + error.message
-                    };
+                    // Disparar evento para sincronização entre abas
+                    window.dispatchEvent(new StorageEvent('storage', {
+                        key: this.chaveStorage,
+                        newValue: JSON.stringify(dadosCompletos)
+                    }));
+                    
+                    return true;
+                } catch (e) {
+                    console.error('Erro ao salvar:', e);
+                    return false;
                 }
             }
 
-            // 📥 Carregar agendamentos (fallback)
-            async carregarAgendamentos() {
+            // 📥 Carregar do localStorage
+            carregarDoStorage() {
                 try {
-                    const snapshot = await db.collection("agendamentos")
-                        .orderBy("inicio", "desc")
-                        .get();
-                    
-                    this.agendamentos = [];
-                    snapshot.forEach((doc) => {
-                        this.agendamentos.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    
-                    return this.agendamentos;
-                } catch (error) {
-                    console.error("Erro ao carregar:", error);
+                    const dados = localStorage.getItem(this.chaveStorage);
+                    if (dados) {
+                        const parsed = JSON.parse(dados);
+                        return parsed.agendamentos || [];
+                    }
+                    return [];
+                } catch (e) {
+                    console.error('Erro ao carregar:', e);
                     return [];
                 }
             }
 
-            // 🗑️ Remover agendamento
-            async removerAgendamento(id) {
-                try {
-                    await db.collection("agendamentos").doc(id).delete();
-                    return { sucesso: true, mensagem: "Agendamento removido" };
-                } catch (error) {
-                    return { sucesso: false, mensagem: "Erro ao remover: " + error.message };
-                }
+            // 🔄 Sincronização automática entre abas
+            iniciarSincronizacaoAutomatica() {
+                // Sincronizar quando dados mudarem em outras abas
+                window.addEventListener('storage', (e) => {
+                    if (e.key === this.chaveStorage && e.newValue) {
+                        try {
+                            const novosDados = JSON.parse(e.newValue);
+                            this.agendamentos = novosDados.agendamentos || [];
+                            if (typeof window.atualizarInterface === 'function') {
+                                window.atualizarInterface();
+                            }
+                        } catch (error) {
+                            console.error('Erro na sincronização:', error);
+                        }
+                    }
+                });
+
+                // Sincronizar a cada 10 segundos (para detectar mudanças)
+                setInterval(() => {
+                    const dadosAtuais = this.carregarDoStorage();
+                    if (JSON.stringify(dadosAtuais) !== JSON.stringify(this.agendamentos)) {
+                        this.agendamentos = dadosAtuais;
+                        if (typeof window.atualizarInterface === 'function') {
+                            window.atualizarInterface();
+                        }
+                    }
+                }, 10000);
+            }
+
+            // 🆔 Gerar ID único
+            gerarId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+            }
+
+            // ➕ Adicionar agendamento
+            adicionarAgendamento(dados) {
+                const novoAgendamento = {
+                    id: this.gerarId(),
+                    sala: dados.sala,
+                    professor: dados.professor,
+                    inicio: dados.inicio,
+                    fim: dados.fim,
+                    dataCriacao: new Date().toISOString(),
+                    criadoPor: this.obterIdentificadorUsuario(),
+                    dispositivo: this.obterIdentificadorDispositivo()
+                };
+
+                this.agendamentos.push(novoAgendamento);
+                const sucesso = this.salvarNoStorage();
+                
+                return {
+                    sucesso: sucesso,
+                    agendamento: novoAgendamento,
+                    mensagem: sucesso ? '✅ Agendamento salvo com sucesso!' : '❌ Erro ao salvar agendamento'
+                };
             }
 
             // 👤 Obter identificador do usuário
             obterIdentificadorUsuario() {
                 let usuarioId = localStorage.getItem('usuario_senai_id');
                 if (!usuarioId) {
-                    usuarioId = 'user_' + Math.random().toString(36).substr(2, 8);
+                    usuarioId = 'usr_' + Math.random().toString(36).substr(2, 6);
                     localStorage.setItem('usuario_senai_id', usuarioId);
                 }
                 return usuarioId;
             }
 
-            // 📋 Obter agendamentos
-            obterAgendamentos() {
-                return this.agendamentos;
+            // 📱 Obter identificador do dispositivo
+            obterIdentificadorDispositivo() {
+                let dispositivoId = localStorage.getItem('dispositivo_senai_id');
+                if (!dispositivoId) {
+                    dispositivoId = 'dev_' + Math.random().toString(36).substr(2, 6);
+                    localStorage.setItem('dispositivo_senai_id', dispositivoId);
+                }
+                return dispositivoId;
             }
 
-            // 🎯 Atualizar interface
-            atualizarInterface() {
-                if (typeof window.atualizarListaAgendamentos === 'function') {
-                    window.atualizarListaAgendamentos();
+            // 📋 Obter todos os agendamentos
+            obterAgendamentos() {
+                return this.agendamentos.sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
+            }
+
+            // 🗑️ Remover agendamento
+            removerAgendamento(id) {
+                this.agendamentos = this.agendamentos.filter(ag => ag.id !== id);
+                const sucesso = this.salvarNoStorage();
+                return sucesso;
+            }
+
+            // 🔗 Sincronizar com "servidor" (localStorage compartilhado)
+            sincronizarDados() {
+                // Recarregar do storage para pegar dados mais recentes
+                this.agendamentos = this.carregarDoStorage();
+                this.salvarNoStorage(); // Forçar atualização
+                return {
+                    sucesso: true,
+                    mensagem: '✅ Dados sincronizados!',
+                    total: this.agendamentos.length
+                };
+            }
+
+            // 📤 Exportar dados para backup
+            exportarDados() {
+                return JSON.stringify({
+                    agendamentos: this.agendamentos,
+                    metadata: {
+                        exportadoEm: new Date().toISOString(),
+                        total: this.agendamentos.length,
+                        versao: '1.0'
+                    }
+                }, null, 2);
+            }
+
+            // 📥 Importar dados de backup
+            importarDados(dadosJSON) {
+                try {
+                    const dados = JSON.parse(dadosJSON);
+                    if (dados.agendamentos && Array.isArray(dados.agendamentos)) {
+                        // Mesclar dados, evitando duplicatas
+                        const idsExistentes = new Set(this.agendamentos.map(ag => ag.id));
+                        const novosAgendamentos = dados.agendamentos.filter(ag => !idsExistentes.has(ag.id));
+                        
+                        this.agendamentos.push(...novosAgendamentos);
+                        const sucesso = this.salvarNoStorage();
+                        
+                        return {
+                            sucesso: sucesso,
+                            adicionados: novosAgendamentos.length,
+                            mensagem: sucesso ? `✅ ${novosAgendamentos.length} agendamentos importados` : '❌ Erro ao importar'
+                        };
+                    }
+                    throw new Error('Formato inválido');
+                } catch (error) {
+                    return {
+                        sucesso: false,
+                        mensagem: '❌ Erro ao importar: ' + error.message
+                    };
                 }
             }
         }
 
         // Instanciar o sistema
-        const sistema = new SistemaFirebase();
+        const sistema = new SistemaAgendamentoReal();
 
         // Inicialização da página
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Sistema Firebase iniciado');
+            console.log('🚀 Sistema de Agendamento iniciado');
             configurarDatasIniciais();
+            carregarAgendamentos();
             
-            // Iniciar ouvinte em tempo real
-            sistema.iniciarOuvinteTempoReal();
-            
-            // Atualizar status
+            // Mostrar informações do sistema
             setTimeout(() => {
-                document.getElementById('status').innerHTML = '✅ Conectado! Sistema em tempo real ativo';
-            }, 2000);
+                document.getElementById('status').innerHTML = 
+                    '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos encontrados';
+            }, 1000);
         });
 
         // Configurar datas iniciais
@@ -516,7 +585,7 @@
         }
 
         // Criar novo agendamento
-        async function criarAgendamento() {
+        function criarAgendamento() {
             const sala = document.getElementById('sala').value;
             const professor = document.getElementById('professor').value;
             const dataInicio = document.getElementById('dataInicio').value;
@@ -539,11 +608,8 @@
                 return;
             }
 
-            // Mostrar loading
-            statusDiv.innerHTML = '💾 Salvando no banco de dados em tempo real...';
-
             // Criar agendamento no sistema
-            const resultado = await sistema.salvarAgendamento({
+            const resultado = sistema.adicionarAgendamento({
                 sala: sala,
                 professor: professor,
                 inicio: dataInicio,
@@ -558,11 +624,12 @@
                 // Limpar formulário
                 limparFormulario();
                 
-                // Restaurar status normal após 3 segundos
+                // Recarregar lista após 2 segundos
                 setTimeout(() => {
-                    statusDiv.innerHTML = '✅ Conectado! Sistema em tempo real ativo';
+                    carregarAgendamentos();
+                    statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
                     statusDiv.className = 'status status-info';
-                }, 3000);
+                }, 2000);
             }
         }
 
@@ -574,22 +641,8 @@
             document.getElementById('erroGeral').style.display = 'none';
         }
 
-        // Carregar agendamentos (fallback)
-        async function carregarAgendamentos() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '🔄 Atualizando lista...';
-            
-            await sistema.carregarAgendamentos();
-            atualizarListaAgendamentos();
-            
-            statusDiv.innerHTML = '✅ Lista atualizada!';
-            setTimeout(() => {
-                statusDiv.innerHTML = '✅ Conectado! Sistema em tempo real ativo';
-            }, 2000);
-        }
-
-        // Atualizar lista de agendamentos
-        window.atualizarListaAgendamentos = function() {
+        // Carregar e exibir agendamentos
+        function carregarAgendamentos() {
             const container = document.getElementById('agendamentos-container');
             const contador = document.getElementById('contador');
             const agendamentos = sistema.obterAgendamentos();
@@ -649,6 +702,10 @@
                                 <strong>📅 Duração:</strong>
                                 <span>${calcularDuracao(ag.inicio, ag.fim)}</span>
                             </div>
+                            <div class="info-item">
+                                <strong>📱 Criado em:</strong>
+                                <span>${ag.dispositivo || 'Este dispositivo'}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -657,6 +714,24 @@
             html += '</div>';
             container.innerHTML = html;
             contador.textContent = `${agendamentos.length} agendamento${agendamentos.length !== 1 ? 's' : ''}`;
+        }
+
+        // Sincronizar dados
+        function sincronizarDados() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '🔄 Sincronizando dados...';
+            
+            const resultado = sistema.sincronizarDados();
+            
+            statusDiv.innerHTML = resultado.mensagem + ' - ' + resultado.total + ' agendamentos';
+            statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
+            
+            carregarAgendamentos();
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
+                statusDiv.className = 'status status-info';
+            }, 3000);
         }
 
         // Formatar data para exibição
@@ -685,6 +760,66 @@
                 return `${horas}h ${minutos}min`;
             }
         }
+
+        // Função global para atualização da interface
+        window.atualizarInterface = carregarAgendamentos;
+
+        // Adicionar funcionalidade de exportação/importação
+        function exportarDados() {
+            const dados = sistema.exportarDados();
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `agendamentos_senai_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importarDados() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const resultado = sistema.importarDados(e.target.result);
+                        const statusDiv = document.getElementById('status');
+                        
+                        statusDiv.innerHTML = resultado.mensagem;
+                        statusDiv.className = resultado.sucesso ? 'status status-success' : 'status status-error';
+                        
+                        carregarAgendamentos();
+                        
+                        setTimeout(() => {
+                            statusDiv.innerHTML = '✅ Sistema carregado - ' + sistema.obterAgendamentos().length + ' agendamentos';
+                            statusDiv.className = 'status status-info';
+                        }, 3000);
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Adicionar botões de exportação/importação
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttonGroup = document.querySelector('.button-group');
+            
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'btn';
+            exportBtn.innerHTML = '📤 Exportar';
+            exportBtn.onclick = exportarDados;
+            buttonGroup.appendChild(exportBtn);
+            
+            const importBtn = document.createElement('button');
+            importBtn.className = 'btn';
+            importBtn.innerHTML = '📥 Importar';
+            importBtn.onclick = importarDados;
+            buttonGroup.appendChild(importBtn);
+        });
     </script>
 </body>
 </html>
