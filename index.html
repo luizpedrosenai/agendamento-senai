@@ -1,474 +1,282 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Cadastro</title>
+    <title>Mural de Agendamentos Interativo</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
             padding: 20px;
         }
-        
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        header h1 {
+
+        h1 {
             text-align: center;
-            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 15px;
         }
-        
-        .app-container {
+
+        #painel-resumo {
+            max-width: 900px;
+            margin: 0 auto 20px auto;
+            padding: 15px;
+            background: #fff;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+
+        form {
+            max-width: 900px;
+            margin: 0 auto 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            flex: 1 1 180px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .salas {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
         }
-        
-        .form-section {
-            flex: 1;
-            min-width: 300px;
-            background: white;
+
+        .sala-card {
+            flex: 1 1 280px;
+            border-radius: 15px;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        
-        .data-section {
-            flex: 2;
-            min-width: 300px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+        .sala-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
-        
-        h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
+
+        .sala-1 {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
         }
-        
-        .form-group {
-            margin-bottom: 15px;
+
+        .sala-2 {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
         }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
+
+        .sala-3 {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
         }
-        
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+
+        .agendamento {
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            position: relative;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, background 0.5s;
         }
-        
-        button {
-            background-color: #3498db;
+
+        .agendamento:hover {
+            transform: scale(1.03);
+        }
+
+        .agendamento button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
+            padding: 4px 8px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
+            font-size: 0.8rem;
+            transition: 0.3s;
         }
-        
-        button:hover {
-            background-color: #2980b9;
+
+        .agendamento button:hover {
+            background: #a71d2a;
         }
-        
-        .btn-danger {
-            background-color: #e74c3c;
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-edit {
-            background-color: #f39c12;
-        }
-        
-        .btn-edit:hover {
-            background-color: #d35400;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-        }
-        
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .actions button {
-            padding: 5px 10px;
-            font-size: 14px;
-        }
-        
-        .no-data {
+
+        #mensagem {
             text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 24px;
         }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 4px;
-            color: white;
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 1000;
-        }
-        
-        .notification.success {
-            background-color: #2ecc71;
-        }
-        
-        .notification.error {
-            background-color: #e74c3c;
-        }
-        
-        .notification.show {
-            opacity: 1;
-        }
-        
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .form-section, .data-section {
-                width: 100%;
+
+        @media(max-width:700px) {
+
+            form input,
+            form select,
+            form button {
+                flex: 1 1 100%;
             }
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <div class="container">
-            <h1>Sistema de Cadastro</h1>
-        </div>
-    </header>
-    
-    <div class="container">
-        <div class="app-container">
-            <section class="form-section">
-                <h2>Cadastrar Novo Item</h2>
-                <form id="cadastroForm">
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" id="nome" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">E-mail:</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="telefone">Telefone:</label>
-                        <input type="tel" id="telefone">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="categoria">Categoria:</label>
-                        <select id="categoria">
-                            <option value="Pessoal">Pessoal</option>
-                            <option value="Trabalho">Trabalho</option>
-                            <option value="Estudos">Estudos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button type="submit" id="btnSalvar">Salvar</button>
-                        <button type="button" id="btnCancelar" class="btn-danger">Cancelar</button>
-                    </div>
-                </form>
-            </section>
-            
-            <section class="data-section">
-                <h2>Itens Cadastrados</h2>
-                <div id="tabelaContainer">
-                    <table id="tabelaDados">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>E-mail</th>
-                                <th>Telefone</th>
-                                <th>Categoria</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaCorpo">
-                            <!-- Os dados serão inseridos aqui via JavaScript -->
-                        </tbody>
-                    </table>
-                    <div id="semDados" class="no-data">
-                        Nenhum item cadastrado ainda.
-                    </div>
-                </div>
-            </section>
-        </div>
+    <h1>Mural de Agendamentos Interativo</h1>
+
+    <div id="painel-resumo">
+        <div>Total Agendamentos: <span id="total-agendamentos">0</span></div>
+        <div>Salas Ocupadas: <span id="salas-ocupadas">0</span></div>
+        <div>Próximas 24h: <span id="proximas-24h">0</span></div>
     </div>
-    
-    <div id="notification" class="notification"></div>
+
+    <form id="form-agendamento">
+        <select id="sala">
+            <option value="Sala 1">Sala 1</option>
+            <option value="Sala 2">Sala 2</option>
+            <option value="Sala 3">Sala 3</option>
+        </select>
+        <input type="text" id="professor" placeholder="Nome do Professor" required>
+        <input type="datetime-local" id="inicio" required>
+        <input type="datetime-local" id="fim" required>
+        <button type="submit">Adicionar</button>
+    </form>
+
+    <div id="mensagem"></div>
+
+    <div class="salas" id="lista-salas"></div>
 
     <script>
-        // Elementos do DOM
-        const cadastroForm = document.getElementById('cadastroForm');
-        const tabelaCorpo = document.getElementById('tabelaCorpo');
-        const semDados = document.getElementById('semDados');
-        const btnCancelar = document.getElementById('btnCancelar');
-        const notification = document.getElementById('notification');
-        
-        // Estado da aplicação
-        let editandoId = null;
-        let dados = JSON.parse(localStorage.getItem('dadosCadastro')) || [];
-        
-        // Inicializar a aplicação
-        function inicializar() {
-            atualizarTabela();
-            configurarEventos();
+        // Link CSV do Google Sheets (substitua pelo seu link CSV)
+        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqn76mct4uYBbdcaZ_U4p3ch4jp_OCvRw_ezxgrYG52ec1DEaq2uoUfVzt3QW02UUGZLoCfvnSIxXB/pub?output=csv";
+
+        // Variável para armazenar agendamentos
+        let agendamentos = [];
+
+        // Funções utilitárias
+        function mostrarMensagem(texto, cor = "green") {
+            const msg = document.getElementById('mensagem');
+            msg.textContent = texto;
+            msg.style.color = cor;
+            setTimeout(() => { msg.textContent = ''; }, 3000);
         }
-        
-        // Configurar eventos
-        function configurarEventos() {
-            cadastroForm.addEventListener('submit', salvarDados);
-            btnCancelar.addEventListener('click', cancelarEdicao);
-        }
-        
-        // Salvar dados (novo ou edição)
-        function salvarDados(event) {
-            event.preventDefault();
-            
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const telefone = document.getElementById('telefone').value;
-            const categoria = document.getElementById('categoria').value;
-            
-            if (editandoId !== null) {
-                // Editar item existente
-                const index = dados.findIndex(item => item.id === editandoId);
-                if (index !== -1) {
-                    dados[index] = {
-                        id: editandoId,
-                        nome,
-                        email,
-                        telefone,
-                        categoria
-                    };
-                    mostrarNotificacao('Item atualizado com sucesso!', 'success');
-                }
-                editandoId = null;
-                document.getElementById('btnSalvar').textContent = 'Salvar';
-            } else {
-                // Adicionar novo item
-                const novoItem = {
-                    id: Date.now(), // ID único baseado no timestamp
-                    nome,
-                    email,
-                    telefone,
-                    categoria
-                };
-                dados.push(novoItem);
-                mostrarNotificacao('Item cadastrado com sucesso!', 'success');
-            }
-            
-            // Salvar no localStorage
-            localStorage.setItem('dadosCadastro', JSON.stringify(dados));
-            
-            // Atualizar a tabela e limpar o formulário
-            atualizarTabela();
-            cadastroForm.reset();
-        }
-        
-        // Editar item
-        function editarItem(id) {
-            const item = dados.find(item => item.id === id);
-            if (item) {
-                document.getElementById('nome').value = item.nome;
-                document.getElementById('email').value = item.email;
-                document.getElementById('telefone').value = item.telefone;
-                document.getElementById('categoria').value = item.categoria;
-                
-                editandoId = id;
-                document.getElementById('btnSalvar').textContent = 'Atualizar';
-                
-                // Rolar para o formulário
-                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+
+        // Carrega CSV
+        async function carregarAgendamentos() {
+            try {
+                const response = await fetch(LINK_CSV);
+                const csvText = await response.text();
+                const linhas = csvText.split('\n').slice(1).filter(l => l.trim() !== "");
+                agendamentos = linhas.map((l, i) => {
+                    const [sala, professor, inicio, fim] = l.split(',');
+                    return { id: i, sala, professor, inicio, fim };
+                });
+                renderizarAgendamentos();
+            } catch (err) {
+                console.error("Erro ao carregar agendamentos:", err);
             }
         }
-        
-        // Excluir item
-        function excluirItem(id) {
-            if (confirm('Tem certeza que deseja excluir este item?')) {
-                dados = dados.filter(item => item.id !== id);
-                localStorage.setItem('dadosCadastro', JSON.stringify(dados));
-                atualizarTabela();
-                mostrarNotificacao('Item excluído com sucesso!', 'success');
-                
-                // Se estava editando o item excluído, cancelar a edição
-                if (editandoId === id) {
-                    cancelarEdicao();
-                }
+
+        // Renderiza cards
+        function renderizarAgendamentos() {
+            const lista = document.getElementById('lista-salas');
+            const salasObj = {};
+            let total = 0, proximas24h = 0, salasOcupadasSet = new Set();
+            const agora = new Date();
+
+            agendamentos.forEach(ag => {
+                if (!salasObj[ag.sala]) salasObj[ag.sala] = [];
+                salasObj[ag.sala].push(ag);
+
+                const diffHoras = (new Date(ag.fim) - agora) / (1000 * 60 * 60);
+                if (diffHoras > 0) total++;
+                if (diffHoras < 24 && diffHoras > 0) proximas24h++;
+                if (new Date(ag.fim) > agora) salasOcupadasSet.add(ag.sala);
+            });
+
+            document.getElementById('total-agendamentos').textContent = total;
+            document.getElementById('salas-ocupadas').textContent = salasOcupadasSet.size;
+            document.getElementById('proximas-24h').textContent = proximas24h;
+
+            lista.innerHTML = '';
+            for (const sala in salasObj) {
+                const card = document.createElement('div');
+                card.className = 'sala-card sala-' + (sala.split(' ')[1] || 1);
+                card.innerHTML = `<h2>${sala}</h2>`;
+
+                salasObj[sala].sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+                salasObj[sala].forEach(ag => {
+                    const item = document.createElement('div');
+                    item.className = 'agendamento';
+                    item.innerHTML = `<strong>${ag.professor}</strong><br>
+                            ${new Date(ag.inicio).toLocaleString()} - ${new Date(ag.fim).toLocaleString()}
+                            <button onclick="excluirAgendamento(${ag.id})">Excluir</button>`;
+                    card.appendChild(item);
+                });
+                lista.appendChild(card);
             }
         }
-        
-        // Cancelar edição
-        function cancelarEdicao() {
-            editandoId = null;
-            document.getElementById('btnSalvar').textContent = 'Salvar';
-            cadastroForm.reset();
-        }
-        
-        // Atualizar a tabela com os dados
-        function atualizarTabela() {
-            tabelaCorpo.innerHTML = '';
-            
-            if (dados.length === 0) {
-                semDados.style.display = 'block';
+
+        // Adicionar agendamento local
+        document.getElementById('form-agendamento').addEventListener('submit', e => {
+            e.preventDefault();
+            const sala = document.getElementById('sala').value;
+            const professor = document.getElementById('professor').value;
+            const inicio = document.getElementById('inicio').value;
+            const fim = document.getElementById('fim').value;
+
+            if (new Date(fim) <= new Date(inicio)) {
+                alert("A data final deve ser depois da inicial!");
                 return;
             }
-            
-            semDados.style.display = 'none';
-            
-            dados.forEach(item => {
-                const linha = document.createElement('tr');
-                
-                linha.innerHTML = `
-                    <td>${item.nome}</td>
-                    <td>${item.email}</td>
-                    <td>${item.telefone || '-'}</td>
-                    <td>${item.categoria}</td>
-                    <td class="actions">
-                        <button class="btn-edit" onclick="editarItem(${item.id})">Editar</button>
-                        <button class="btn-danger" onclick="excluirItem(${item.id})">Excluir</button>
-                    </td>
-                `;
-                
-                tabelaCorpo.appendChild(linha);
-            });
-        }
-        
-        // Mostrar notificação
-        function mostrarNotificacao(mensagem, tipo) {
-            notification.textContent = mensagem;
-            notification.className = `notification ${tipo} show`;
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Exportar dados
-        function exportarDados() {
-            const dataStr = JSON.stringify(dados, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = 'dados_cadastro.json';
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-        
-        // Importar dados
-        function importarDados(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(event) {
-                try {
-                    const dadosImportados = JSON.parse(event.target.result);
-                    if (Array.isArray(dadosImportados)) {
-                        dados = dadosImportados;
-                        localStorage.setItem('dadosCadastro', JSON.stringify(dados));
-                        atualizarTabela();
-                        mostrarNotificacao('Dados importados com sucesso!', 'success');
-                    } else {
-                        mostrarNotificacao('Formato de arquivo inválido!', 'error');
-                    }
-                } catch (e) {
-                    mostrarNotificacao('Erro ao importar dados!', 'error');
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
-        }
-        
-        // Inicializar a aplicação quando a página carregar
-        document.addEventListener('DOMContentLoaded', inicializar);
-        
-        // Adicionar botões de exportação/importação
-        document.addEventListener('DOMContentLoaded', function() {
-            const dataSection = document.querySelector('.data-section');
-            const header = dataSection.querySelector('h2');
-            
-            const buttonGroup = document.createElement('div');
-            buttonGroup.className = 'button-group';
-            buttonGroup.innerHTML = `
-                <button onclick="exportarDados()">Exportar Dados</button>
-                <label for="importFile" style="display: inline-block;">
-                    <button type="button">Importar Dados</button>
-                </label>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importarDados(event)">
-            `;
-            
-            header.parentNode.insertBefore(buttonGroup, header.nextSibling);
+
+            agendamentos.push({ id: agendamentos.length, sala, professor, inicio, fim });
+            mostrarMensagem("Agendamento adicionado!");
+            renderizarAgendamentos();
+            e.target.reset();
         });
+
+        // Excluir agendamento
+        function excluirAgendamento(id) {
+            agendamentos = agendamentos.filter(a => a.id !== id);
+            mostrarMensagem("Agendamento excluído!", "red");
+            renderizarAgendamentos();
+        }
+
+        // Inicializa
+        carregarAgendamentos();
     </script>
 </body>
+
 </html>
