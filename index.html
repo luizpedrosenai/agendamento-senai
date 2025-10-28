@@ -124,6 +124,18 @@
             box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
         }
 
+        .btn-filter {
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
         .agendamentos-section {
             background: white;
             padding: 25px;
@@ -135,6 +147,32 @@
             color: #2c3e50;
             margin-bottom: 20px;
             font-size: 1.5em;
+        }
+
+        .filtros-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #27ae60;
+        }
+
+        .filtros-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filtro-actions {
+            display: flex;
+            gap: 10px;
         }
 
         .agendamentos-grid {
@@ -215,6 +253,20 @@
             color: #666;
         }
 
+        .filter-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .filter-info p {
+            margin: 0;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
         .status-indicator {
             position: absolute;
             top: 15px;
@@ -290,6 +342,14 @@
                 grid-template-columns: 1fr;
             }
 
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filtro-actions {
+                flex-direction: column;
+            }
+
             .agendamentos-grid {
                 grid-template-columns: 1fr;
             }
@@ -361,7 +421,49 @@
 
             <section class="agendamentos-section">
                 <h2>📋 Agendamentos Existentes</h2>
+                
+                <!-- Seção de Filtros -->
+                <div class="filtros-section">
+                    <h3>🔍 Filtrar Agendamentos</h3>
+                    <div class="filtros-grid">
+                        <div class="form-group">
+                            <label for="filtroSala">Filtrar por Sala:</label>
+                            <select id="filtroSala">
+                                <option value="">Todas as salas</option>
+                                <option value="Sala 1">Sala 1</option>
+                                <option value="Sala 2">Sala 2</option>
+                                <option value="Sala 3">Sala 3</option>
+                                <option value="Sala 4">Sala 4</option>
+                                <option value="Laboratório 1">Laboratório 1</option>
+                                <option value="Laboratório 2">Laboratório 2</option>
+                                <option value="Auditório">Auditório</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filtroDia">Filtrar por Dia:</label>
+                            <select id="filtroDia">
+                                <option value="">Todos os dias</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                            </select>
+                        </div>
+                        <div class="filtro-actions">
+                            <button class="btn btn-filter" onclick="aplicarFiltros()">
+                                🔍 Aplicar Filtros
+                            </button>
+                            <button class="btn btn-clear" onclick="limparFiltros()">
+                                🗑️ Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="sync-status"></div>
+                <div id="filter-info"></div>
                 <div id="agendamentos-container">
                     <div class="loading">
                         <div class="loading-spinner"></div>
@@ -387,6 +489,10 @@
             'Laboratório 2': 'laboratorio-2',
             'Auditório': 'auditorio'
         };
+
+        // Variáveis globais para filtros
+        let agendamentosGlobal = [];
+        let filtroAtivo = false;
 
         // Carregar agendamentos quando a página carregar
         document.addEventListener('DOMContentLoaded', function () {
@@ -421,31 +527,100 @@
                 }
 
                 const data = await response.json();
-                const agendamentos = data.record.agendamentos || [];
-                console.log(`✅ ${agendamentos.length} agendamentos carregados`);
+                agendamentosGlobal = data.record.agendamentos || [];
+                console.log(`✅ ${agendamentosGlobal.length} agendamentos carregados`);
 
                 syncStatus.innerHTML = `<div class="sync-status sync-success">✅ Sincronizado - ${new Date().toLocaleTimeString()}</div>`;
-                mostrarAgendamentos(agendamentos);
+                mostrarAgendamentos(agendamentosGlobal);
 
             } catch (error) {
                 console.error('❌ Erro ao carregar:', error);
                 syncStatus.innerHTML = `<div class="sync-status sync-error">❌ Erro de sincronização - ${new Date().toLocaleTimeString()}</div>`;
 
                 // Tentar carregar do localStorage
-                const agendamentosLocais = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
-                mostrarAgendamentos(agendamentosLocais);
+                agendamentosGlobal = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
+                mostrarAgendamentos(agendamentosGlobal);
             }
+        }
+
+        function aplicarFiltros() {
+            const filtroSala = document.getElementById('filtroSala').value;
+            const filtroDia = document.getElementById('filtroDia').value;
+
+            let agendamentosFiltrados = [...agendamentosGlobal];
+
+            // Aplicar filtro por sala
+            if (filtroSala) {
+                agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.sala === filtroSala);
+            }
+
+            // Aplicar filtro por dia
+            if (filtroDia) {
+                agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.diaSemana === filtroDia);
+            }
+
+            // Atualizar informações do filtro
+            atualizarInfoFiltro(filtroSala, filtroDia);
+            
+            // Mostrar agendamentos filtrados
+            mostrarAgendamentos(agendamentosFiltrados);
+        }
+
+        function limparFiltros() {
+            document.getElementById('filtroSala').value = '';
+            document.getElementById('filtroDia').value = '';
+            document.getElementById('filter-info').innerHTML = '';
+            mostrarAgendamentos(agendamentosGlobal);
+        }
+
+        function atualizarInfoFiltro(filtroSala, filtroDia) {
+            const filterInfo = document.getElementById('filter-info');
+            let infoText = '';
+
+            if (filtroSala && filtroDia) {
+                infoText = `Mostrando agendamentos da <strong>${filtroSala}</strong> no dia <strong>${filtroDia}</strong>`;
+            } else if (filtroSala) {
+                infoText = `Mostrando agendamentos da <strong>${filtroSala}</strong>`;
+            } else if (filtroDia) {
+                infoText = `Mostrando agendamentos do dia <strong>${filtroDia}</strong>`;
+            } else {
+                filterInfo.innerHTML = '';
+                return;
+            }
+
+            filterInfo.innerHTML = `
+                <div class="filter-info">
+                    <p>${infoText} 
+                    <button onclick="limparFiltros()" style="background: none; border: none; color: #1565c0; cursor: pointer; margin-left: 10px; text-decoration: underline;">
+                        (limpar filtros)
+                    </button>
+                    </p>
+                </div>
+            `;
         }
 
         function mostrarAgendamentos(agendamentos) {
             const container = document.getElementById('agendamentos-container');
 
             if (agendamentos.length === 0) {
+                const filtroSala = document.getElementById('filtroSala').value;
+                const filtroDia = document.getElementById('filtroDia').value;
+                
+                let mensagem = 'Nenhum agendamento encontrado';
+                if (filtroSala || filtroDia) {
+                    mensagem += ' com os filtros aplicados';
+                }
+
                 container.innerHTML = `
                     <div class="empty-state">
                         <div style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;">📭</div>
-                        <h3>Nenhum agendamento encontrado</h3>
-                        <p>Adicione o primeiro agendamento usando o formulário acima.</p>
+                        <h3>${mensagem}</h3>
+                        <p>${filtroSala || filtroDia ? 'Tente alterar os filtros ou ' : ''}Adicione um novo agendamento usando o formulário acima.</p>
+                        ${filtroSala || filtroDia ? 
+                            `<button class="btn" onclick="limparFiltros()" style="margin-top: 15px;">
+                                🗑️ Limpar Filtros
+                            </button>` : ''
+                        }
                     </div>
                 `;
                 return;
@@ -462,7 +637,7 @@
                 const agora = new Date();
                 const dataInicio = new Date(ag.inicio);
                 const status = dataInicio > agora ? 'disponivel' : 'ocupado';
-                const corSala = coresSalas[ag.sala] || 'sala-1'; // Fallback para Sala 1
+                const corSala = coresSalas[ag.sala] || 'sala-1';
 
                 html += `
                     <div class="agendamento-card ${corSala}">
@@ -591,7 +766,7 @@
                 document.getElementById('diaSemana').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
-                mostrarAgendamentos(agendamentos);
+                carregarAgendamentos();
             }
         }
 
@@ -645,7 +820,7 @@
                 const agendamentos = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
                 const novos = agendamentos.filter(ag => ag.id !== id);
                 localStorage.setItem('agendamentos_senai', JSON.stringify(novos));
-                mostrarAgendamentos(novos);
+                carregarAgendamentos();
             }
         }
 
