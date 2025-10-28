@@ -207,12 +207,6 @@
             color: #666;
         }
 
-        .empty-state i {
-            font-size: 3em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
         .status-indicator {
             position: absolute;
             top: 15px;
@@ -247,6 +241,36 @@
             border: 1px solid #f5c6cb;
         }
 
+        .config-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .config-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -274,7 +298,43 @@
         </header>
 
         <div class="main-content">
-            <section class="form-section">
+            <!-- SEÇÃO DE CONFIGURAÇÃO -->
+            <section class="config-section" id="config-section">
+                <h3>⚙️ Configuração do Sistema</h3>
+                
+                <div class="success-message">
+                    <strong>✅ Bin criado com sucesso!</strong><br>
+                    Seu Bin ID: <code>6900d42643b1c97be9876b0d</code>
+                </div>
+                
+                <p><strong>Agora só falta a API Key:</strong></p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="bin-id">Bin ID (já preenchido):</label>
+                        <input type="text" id="bin-id" class="config-input" value="6900d42643b1c97be9876b0d" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="api-key">API Key (X-Master-Key):</label>
+                        <input type="text" id="api-key" class="config-input" placeholder="Cole sua X-Master-Key aqui">
+                    </div>
+                </div>
+                <button class="btn" onclick="testarConfiguracao()">
+                    🧪 Testar Configuração
+                </button>
+                
+                <div style="margin-top: 15px; font-size: 14px; color: #666;">
+                    <strong>Como encontrar a API Key:</strong>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>Faça login no <a href="https://jsonbin.io" target="_blank">JSONBin.io</a></li>
+                        <li>Clique no seu perfil → "API Keys"</li>
+                        <li>Copie a "X-Master-Key"</li>
+                        <li>Cole no campo acima</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="form-section" id="form-section" style="display: none;">
                 <h2>➕ Novo Agendamento</h2>
                 <div class="form-grid">
                     <div class="form-group">
@@ -308,7 +368,7 @@
                 </button>
             </section>
 
-            <section class="agendamentos-section">
+            <section class="agendamentos-section" id="agendamentos-section" style="display: none;">
                 <h2>📋 Agendamentos Existentes</h2>
                 <div id="sync-status"></div>
                 <div id="agendamentos-container">
@@ -322,133 +382,117 @@
     </div>
 
     <script>
-        // Configuração do JSONBin.io
-        const BIN_ID = '67d9b9a1e41e4d34a43b7b7f'; // ID do bin público
-        const API_KEY = '$2a$10$LJ.8K9cF9v5X5v5X5v5X5.'; // Chave pública (apenas leitura)
-        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+        // Variáveis globais
+        const BIN_ID = '6900d42643b1c97be9876b0d'; // Seu Bin ID fixo
+        let API_KEY = '';
 
-        // Chave mestra para escrita (NÃO COMPARTILHE PUBLICAMENTE)
-        // Esta chave está desativada por segurança
-        const MASTER_KEY = '';
-
-        // Carregar agendamentos quando a página carregar
+        // Carregar configuração quando a página carregar
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Página carregada - iniciando sistema...');
-            carregarAgendamentos();
+            console.log('Sistema iniciado - Bin ID:', BIN_ID);
+            verificarConfiguracao();
             
-            // Configurar datas mínimas para os campos de data/hora
+            // Configurar datas mínimas
             const agora = new Date();
             const dataMinima = agora.toISOString().slice(0, 16);
             document.getElementById('inicio').min = dataMinima;
             document.getElementById('fim').min = dataMinima;
-
-            // Atualizar automaticamente a cada 30 segundos
-            setInterval(carregarAgendamentos, 30000);
         });
 
+        function verificarConfiguracao() {
+            const apiKeySalva = localStorage.getItem('agendamentos_api_key');
+            
+            if (apiKeySalva) {
+                API_KEY = apiKeySalva;
+                document.getElementById('api-key').value = apiKeySalva;
+                document.getElementById('config-section').style.display = 'none';
+                document.getElementById('form-section').style.display = 'block';
+                document.getElementById('agendamentos-section').style.display = 'block';
+                carregarAgendamentos();
+            }
+        }
+
+        async function testarConfiguracao() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            
+            if (!apiKey) {
+                alert('❌ Por favor, cole sua X-Master-Key!');
+                return;
+            }
+
+            try {
+                // Testar a conexão
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro: ${response.status} - ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Verificar se a estrutura está correta
+                if (!data.record || !data.record.agendamentos) {
+                    throw new Error('Estrutura do bin incorreta');
+                }
+                
+                // Salvar configuração
+                localStorage.setItem('agendamentos_api_key', apiKey);
+                
+                API_KEY = apiKey;
+                
+                // Mostrar seções principais
+                document.getElementById('config-section').style.display = 'none';
+                document.getElementById('form-section').style.display = 'block';
+                document.getElementById('agendamentos-section').style.display = 'block';
+                
+                alert('✅ Configuração testada com sucesso! Sistema pronto para uso.');
+                carregarAgendamentos();
+                
+            } catch (error) {
+                console.error('Erro ao testar configuração:', error);
+                alert(`❌ Erro na configuração:\n\n${error.message}\n\nVerifique se:\n1. A API Key está correta\n2. É a X-Master-Key (não a X-Access-Key)`);
+            }
+        }
+
+        function getAPIUrl() {
+            return `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        }
+
         async function carregarAgendamentos() {
+            if (!API_KEY) return;
+
             const container = document.getElementById('agendamentos-container');
             const syncStatus = document.getElementById('sync-status');
             
             try {
-                console.log('Carregando agendamentos da API...');
-                const response = await fetch(API_URL, {
+                console.log('Carregando agendamentos...');
+                const response = await fetch(getAPIUrl(), {
                     headers: {
                         'X-Master-Key': API_KEY
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP! status: ${response.status}`);
+                    throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                const agendamentos = data.record || [];
+                const agendamentos = data.record.agendamentos || [];
                 console.log(`✅ ${agendamentos.length} agendamentos carregados`);
 
-                // Atualizar status de sincronização
                 syncStatus.innerHTML = `<div class="sync-status sync-success">✅ Sincronizado - ${new Date().toLocaleTimeString()}</div>`;
-
-                if (agendamentos.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;">📭</div>
-                            <h3>Nenhum agendamento encontrado</h3>
-                            <p>Adicione o primeiro agendamento usando o formulário acima.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Ordenar agendamentos por data de início
-                agendamentos.sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
-
-                let html = '<div class="agendamentos-grid">';
-                
-                agendamentos.forEach(ag => {
-                    const inicio = formatarData(ag.inicio);
-                    const fim = formatarData(ag.fim);
-                    const agora = new Date();
-                    const dataInicio = new Date(ag.inicio);
-                    const status = dataInicio > agora ? 'disponivel' : 'ocupado';
-                    
-                    html += `
-                        <div class="agendamento-card">
-                            <div class="status-indicator ${status === 'ocupado' ? 'status-occupied' : ''}"></div>
-                            <h3>${ag.sala}</h3>
-                            <div class="agendamento-info">
-                                <p><strong>Professor:</strong> ${ag.professor}</p>
-                                <p><strong>Início:</strong> ${inicio}</p>
-                                <p><strong>Término:</strong> ${fim}</p>
-                                <p><strong>Status:</strong> ${status === 'disponivel' ? '🟢 Disponível' : '🔴 Em andamento'}</p>
-                            </div>
-                            <div class="agendamento-actions">
-                                <button class="btn btn-small" onclick="editarAgendamento(${ag.id})">
-                                    ✏️ Editar
-                                </button>
-                                <button class="btn btn-small btn-delete" onclick="deletarAgendamento(${ag.id})">
-                                    🗑️ Excluir
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                container.innerHTML = html;
+                mostrarAgendamentos(agendamentos);
                 
             } catch (error) {
-                console.error('❌ Erro ao carregar agendamentos:', error);
+                console.error('❌ Erro ao carregar:', error);
                 syncStatus.innerHTML = `<div class="sync-status sync-error">❌ Erro de sincronização - ${new Date().toLocaleTimeString()}</div>`;
                 
-                // Tentar carregar do localStorage como fallback
+                // Tentar carregar do localStorage
                 const agendamentosLocais = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
-                if (agendamentosLocais.length > 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;">⚠️</div>
-                            <h3>Modo offline ativado</h3>
-                            <p>Mostrando agendamentos salvos localmente.</p>
-                            <button class="btn" onclick="carregarAgendamentos()" style="margin-top: 20px;">
-                                🔄 Tentar Sincronizar Novamente
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Mostrar agendamentos locais
-                    mostrarAgendamentos(agendamentosLocais);
-                } else {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;">❌</div>
-                            <h3>Erro ao carregar agendamentos</h3>
-                            <p>${error.message}</p>
-                            <button class="btn" onclick="carregarAgendamentos()" style="margin-top: 20px;">
-                                🔄 Tentar Novamente
-                            </button>
-                        </div>
-                    `;
-                }
+                mostrarAgendamentos(agendamentosLocais);
             }
         }
 
@@ -466,7 +510,7 @@
                 return;
             }
 
-            // Ordenar agendamentos por data de início
+            // Ordenar por data
             agendamentos.sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
 
             let html = '<div class="agendamentos-grid">';
@@ -489,9 +533,6 @@
                             <p><strong>Status:</strong> ${status === 'disponivel' ? '🟢 Disponível' : '🔴 Em andamento'}</p>
                         </div>
                         <div class="agendamento-actions">
-                            <button class="btn btn-small" onclick="editarAgendamento(${ag.id})">
-                                ✏️ Editar
-                            </button>
                             <button class="btn btn-small btn-delete" onclick="deletarAgendamento(${ag.id})">
                                 🗑️ Excluir
                             </button>
@@ -522,21 +563,21 @@
             }
 
             try {
-                // Primeiro, carregar os agendamentos existentes
-                const response = await fetch(API_URL, {
+                // Carregar agendamentos existentes
+                const response = await fetch(getAPIUrl(), {
                     headers: {
                         'X-Master-Key': API_KEY
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro ao carregar agendamentos: ${response.status}`);
+                    throw new Error(`Erro: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                const agendamentos = data.record || [];
+                const agendamentos = data.record.agendamentos || [];
                 
-                // Verificar se já existe um agendamento para a mesma sala no mesmo horário
+                // Verificar conflitos
                 const conflito = agendamentos.some(ag => {
                     return ag.sala === sala && 
                         ((new Date(inicio) >= new Date(ag.inicio) && new Date(inicio) < new Date(ag.fim)) ||
@@ -551,7 +592,7 @@
                 
                 // Criar novo agendamento
                 const novoAgendamento = {
-                    id: Date.now(), // ID único baseado no timestamp
+                    id: Date.now(),
                     sala: sala,
                     professor: professor,
                     inicio: inicio,
@@ -561,7 +602,10 @@
                 // Adicionar à lista
                 agendamentos.push(novoAgendamento);
                 
-                // Salvar localmente como fallback
+                // Salvar no JSONBin
+                await salvarNoJSONBin({ agendamentos: agendamentos });
+                
+                // Salvar localmente
                 localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentos));
                 
                 alert('✅ Agendamento adicionado com sucesso!');
@@ -572,86 +616,85 @@
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
                 
-                // Recarregar lista
+                // Recarregar
                 carregarAgendamentos();
                 
             } catch (error) {
-                console.error('Erro ao adicionar agendamento:', error);
-                alert('❌ Erro ao adicionar agendamento. Os dados foram salvos localmente e serão sincronizados quando a conexão for restabelecida.');
+                console.error('Erro:', error);
+                alert('❌ Erro ao adicionar. Dados salvos localmente.');
                 
                 // Salvar localmente
                 const agendamentos = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
-                const novoAgendamento = {
+                agendamentos.push({
                     id: Date.now(),
                     sala: sala,
                     professor: professor,
                     inicio: inicio,
                     fim: fim
-                };
-                agendamentos.push(novoAgendamento);
+                });
                 localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentos));
                 
-                // Limpar formulário
+                // Limpar e recarregar
                 document.getElementById('sala').value = '';
                 document.getElementById('professor').value = '';
                 document.getElementById('inicio').value = '';
                 document.getElementById('fim').value = '';
-                
-                // Atualizar visualização
                 mostrarAgendamentos(agendamentos);
             }
         }
 
-        async function deletarAgendamento(id) {
-            if (!confirm('⚠️ Tem certeza que deseja excluir este agendamento?')) {
-                return;
+        async function salvarNoJSONBin(objeto) {
+            const response = await fetch(getAPIUrl(), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(objeto)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Erro ao salvar: ${response.status}`);
             }
+            
+            return response.json();
+        }
+
+        async function deletarAgendamento(id) {
+            if (!confirm('⚠️ Tem certeza que deseja excluir este agendamento?')) return;
 
             try {
                 // Carregar agendamentos
-                const response = await fetch(API_URL, {
+                const response = await fetch(getAPIUrl(), {
                     headers: {
                         'X-Master-Key': API_KEY
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`Erro ao carregar agendamentos: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Erro: ${response.status}`);
                 
                 const data = await response.json();
-                let agendamentos = data.record || [];
+                let agendamentos = data.record.agendamentos || [];
                 
-                // Filtrar para remover o agendamento
+                // Filtrar
                 agendamentos = agendamentos.filter(ag => ag.id !== id);
                 
-                // Salvar localmente
+                // Salvar
+                await salvarNoJSONBin({ agendamentos: agendamentos });
                 localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentos));
                 
-                alert('✅ Agendamento excluído com sucesso!');
+                alert('✅ Agendamento excluído!');
                 carregarAgendamentos();
                 
             } catch (error) {
-                console.error('Erro ao excluir agendamento:', error);
-                alert('❌ Erro ao excluir agendamento. A exclusão foi feita apenas localmente.');
+                console.error('Erro:', error);
+                alert('❌ Erro ao excluir. Excluído apenas localmente.');
                 
-                // Excluir localmente
                 const agendamentos = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
-                const novosAgendamentos = agendamentos.filter(ag => ag.id !== id);
-                localStorage.setItem('agendamentos_senai', JSON.stringify(novosAgendamentos));
-                
-                // Atualizar visualização
-                mostrarAgendamentos(novosAgendamentos);
+                const novos = agendamentos.filter(ag => ag.id !== id);
+                localStorage.setItem('agendamentos_senai', JSON.stringify(novos));
+                mostrarAgendamentos(novos);
             }
-        }
-
-        function editarAgendamento(id) {
-            alert(`✏️ Funcionalidade de edição para o agendamento ID: ${id}\n\nEsta funcionalidade será implementada em breve!`);
-            // Para implementar a edição, você precisará:
-            // 1. Buscar os dados do agendamento específico
-            // 2. Preencher o formulário com esses dados
-            // 3. Alterar o botão para "Atualizar" em vez de "Adicionar"
-            // 4. Enviar uma requisição PUT para atualizar
         }
 
         function formatarData(dataString) {
@@ -664,6 +707,9 @@
                 minute: '2-digit'
             });
         }
+
+        // Atualizar automaticamente a cada 30 segundos
+        setInterval(carregarAgendamentos, 30000);
     </script>
 </body>
 </html>
