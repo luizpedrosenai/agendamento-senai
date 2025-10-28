@@ -390,7 +390,7 @@
             margin-right: 6px;
         }
 
-        .status-disponivel {
+        .status-confirmado {
             background: #2ecc71;
         }
 
@@ -736,6 +736,10 @@
 
                 const data = await response.json();
                 agendamentosGlobal = data.record.agendamentos || [];
+                
+                // REMOVER AGENDAMENTOS FINALIZADOS AUTOMATICAMENTE
+                await removerAgendamentosFinalizados();
+                
                 console.log(`✅ ${agendamentosGlobal.length} agendamentos carregados`);
 
                 syncStatus.innerHTML = `<div class="sync-status sync-success">✅ Sincronizado - ${new Date().toLocaleTimeString()}</div>`;
@@ -747,7 +751,27 @@
 
                 // Tentar carregar do localStorage
                 agendamentosGlobal = JSON.parse(localStorage.getItem('agendamentos_senai') || '[]');
+                
+                // Remover agendamentos finalizados também do localStorage
+                await removerAgendamentosFinalizados();
+                
                 mostrarAgendamentos(agendamentosGlobal);
+            }
+        }
+
+        async function removerAgendamentosFinalizados() {
+            const agora = new Date();
+            const agendamentosAtivos = agendamentosGlobal.filter(ag => {
+                const fim = new Date(ag.fim);
+                return fim > agora; // Mantém apenas agendamentos que não terminaram
+            });
+
+            // Se houve remoção de agendamentos, salvar as mudanças
+            if (agendamentosAtivos.length !== agendamentosGlobal.length) {
+                agendamentosGlobal = agendamentosAtivos;
+                await salvarNoJSONBin({ agendamentos: agendamentosGlobal });
+                localStorage.setItem('agendamentos_senai', JSON.stringify(agendamentosGlobal));
+                console.log(`🗑️ Removidos ${agendamentosGlobal.length - agendamentosAtivos.length} agendamentos finalizados`);
             }
         }
 
@@ -817,8 +841,15 @@
 
         function mostrarAgendamentos(agendamentos) {
             const container = document.getElementById('agendamentos-container');
+            const agora = new Date();
 
-            if (agendamentos.length === 0) {
+            // Filtrar apenas agendamentos ativos (não finalizados)
+            const agendamentosAtivos = agendamentos.filter(ag => {
+                const fim = new Date(ag.fim);
+                return fim > agora;
+            });
+
+            if (agendamentosAtivos.length === 0) {
                 const filtroSala = document.getElementById('filtroSala').value;
                 const filtroDia = document.getElementById('filtroDia').value;
                 const filtroPeriodo = document.getElementById('filtroPeriodo').value;
@@ -846,7 +877,7 @@
             // Agrupar agendamentos por sala e período
             const agendamentosPorSalaPeriodo = {};
             
-            agendamentos.forEach(ag => {
+            agendamentosAtivos.forEach(ag => {
                 const chave = `${ag.sala}|${ag.periodo}`;
                 if (!agendamentosPorSalaPeriodo[chave]) {
                     agendamentosPorSalaPeriodo[chave] = [];
@@ -895,21 +926,30 @@
                 agendamentosSalaPeriodo.forEach(ag => {
                     const inicio = formatarData(ag.inicio);
                     const fim = formatarData(ag.fim);
-                    const agora = new Date();
                     const dataInicio = new Date(ag.inicio);
-                    const status = dataInicio > agora ? 'disponivel' : 'ocupado';
+                    const dataFim = new Date(ag.fim);
+
+                    // NOVO SISTEMA DE STATUS
+                    let status, statusText;
+                    if (agora >= dataInicio && agora <= dataFim) {
+                        status = 'ocupado';
+                        statusText = 'OCUPADO';
+                    } else {
+                        status = 'confirmado';
+                        statusText = 'CONFIRMADO';
+                    }
 
                     html += `
                         <div class="agendamento-item">
-                            <div class="status-indicator ${status === 'ocupado' ? 'status-ocupado' : 'status-disponivel'}"></div>
+                            <div class="status-indicator status-${status}"></div>
                             <div class="agendamento-info">
                                 <p><strong>Professor:</strong> ${ag.professor}</p>
                                 <p><strong>Dia:</strong> ${ag.diaSemana}</p>
                                 <p><strong>Início:</strong> ${inicio}</p>
                                 <p><strong>Término:</strong> ${fim}</p>
                                 <p>
-                                    <span class="status-indicator ${status === 'disponivel' ? 'status-disponivel' : 'status-ocupado'}"></span>
-                                    <strong>Status:</strong> ${status === 'disponivel' ? 'Disponível' : 'Em andamento'}
+                                    <span class="status-indicator status-${status}"></span>
+                                    <strong>Status:</strong> ${statusText}
                                 </p>
                             </div>
                             <div class="agendamento-actions">
